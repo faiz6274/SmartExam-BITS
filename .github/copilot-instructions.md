@@ -141,6 +141,7 @@ npm run web             # Web browser
 2. **Font Loading**: Fonts must be loaded before rendering - `App.js` handles this with `useFonts` hook
 3. **Web Support**: If web not needed, remove "web" from `app.json` platforms array to avoid web dependency warnings
 4. **Design Consistency**: All colors, sizes, and spacing MUST come from `GlobalStyles.js` - hardcoded values break consistency
+5. **Package Version Mismatches**: The project may have warnings about package versions. Key expected versions are: `@expo/vector-icons@~14.0.4`, `react-native@0.76.9`, `react-native-svg@15.8.0`. These are usually safe to ignore if the app runs, but run `npm install` to sync if issues occur.
 
 ### Mobile Device Testing
 
