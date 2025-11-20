@@ -8,9 +8,20 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Color, Padding } from "../GlobalStyles";
-import ExamList from "../components/ExamList";
 import TopBar from "../components/TopBar";
+import ExamList from "../components/ExamList";
+import {
+  Color,
+  FontSize,
+  Padding,
+  Border,
+  Gap,
+  Height,
+  Width,
+  FontFamily,
+  LineHeight,
+  BoxShadow,
+} from "../GlobalStyles";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 

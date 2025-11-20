@@ -8,7 +8,18 @@ import {
   Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Color, Padding } from "../GlobalStyles";
+import {
+  Color,
+  FontSize,
+  Padding,
+  Border,
+  Gap,
+  Height,
+  Width,
+  FontFamily,
+  LineHeight,
+  BoxShadow,
+} from "../GlobalStyles";
 import { Image } from "expo-image";
 import Exclude from "../assets/Exclude.svg";
 import Notch from "../assets/Notch.svg";

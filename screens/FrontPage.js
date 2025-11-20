@@ -11,7 +11,7 @@ import BatteryBody from "../assets/Battery-Body.svg";
 import CombinedShape from "../assets/Combined-Shape.svg";
 import BatteryTerminal from "../assets/Battery-Terminal.svg";
 import RecordingIndicator from "../assets/Recording-Indicator.svg";
-import { Color, Padding, Border } from "../GlobalStyles";
+import { Color, Padding, Border, Width, Height, Gap } from "../GlobalStyles";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -94,12 +94,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    height: 812,
+    height: SCREEN_HEIGHT, // replaced hard-coded 812
     flex: 1,
   },
   viewParentLayout: {
-    height: Height.height_812,
-    width: Width.width_375,
+    height: SCREEN_HEIGHT, // replaced Height.height_812
+    width: SCREEN_WIDTH, // replaced Width.width_375
   },
   notchLayout: {
     width: Width.width_219,
@@ -121,12 +121,12 @@ const styles = StyleSheet.create({
   },
   frontPageInner: {
     flexDirection: "row",
-    width: Width.width_375,
+    width: SCREEN_WIDTH, // replaced Width.width_375
   },
   viewParent: {
     paddingTop: 250,
     gap: 218,
-    width: Width.width_375,
+    width: SCREEN_WIDTH, // replaced Width.width_375
   },
   statusBar: {
     left: 0,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     height: Height.height_44,
     flexDirection: "row",
-    width: Width.width_375,
+    width: SCREEN_WIDTH, // replaced Width.width_375
   },
   notch: {
     display: "none",
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   excludeIcon: {
     display: "none",
     height: Height.height_44,
-    width: Width.width_375,
+    width: SCREEN_WIDTH, // replaced Width.width_375
   },
   notchIcon: {
     marginLeft: -109.5,
@@ -224,12 +224,12 @@ const styles = StyleSheet.create({
   homeIndicator: {
     height: Height.height_34,
     flexDirection: "row",
-    width: Width.width_375,
+    width: SCREEN_WIDTH, // replaced Width.width_375
   },
   frontPageHomeIndicator: {
     height: Height.height_5,
-    width: Width.width_134,
-    right: 120,
+    width: "30%", // switched to percentage for better responsiveness
+    alignSelf: "center",
     bottom: 8,
     borderRadius: Border.br_100,
   },

@@ -3,92 +3,84 @@ import {
   ScrollView,
   StyleSheet,
   View,
-  Text,
-  Pressable,
-  Platform,
-  KeyboardAvoidingView,
   Dimensions,
+  Pressable, // ← ADD THIS
+  Text, // ← ADD THIS
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  Color,
+  FontSize,
+  Padding,
+  Border,
+  Gap,
+  Height,
+  Width,
+  FontFamily,
+  LineHeight,
+  BoxShadow,
+} from "../GlobalStyles";
 import Exclude from "../assets/Exclude.svg";
 import Notch from "../assets/Notch.svg";
 import TopBar from "../components/TopBar";
 import Content1 from "../components/Content1";
 import ExamList from "../components/ExamList";
-import {
-  Color,
-  Border,
-  Height,
-  Width,
-  FontSize,
-  Padding,
-  Gap,
-  FontFamily,
-  BoxShadow,
-} from "../GlobalStyles";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const Spherobeforeafter = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.scrollviewFlexBox}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
       >
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-        >
-          <View style={[styles.dashboard, styles.dashboardBg]}>
-            <View style={[styles.homeIndicator, styles.homeLayout]}>
-              <View
-                style={[
-                  styles.spherobeforeafterHomeIndicator,
-                  styles.examinfosectionPosition,
-                ]}
-              />
-            </View>
-            <View style={[styles.notch, styles.notchLayout]}>
-              <View style={styles.bg} />
-              <Exclude
-                style={styles.excludeIcon}
-                width={Width.width_375}
-                height={Height.height_44}
-              />
-              <Notch
-                style={[styles.notchIcon, styles.notchLayout]}
-                width={Width.width_219}
-                height={Height.height_30}
-              />
-            </View>
-            <View style={styles.iconsearch} />
-            <View style={styles.statusArea}>
-              <TopBar />
-              <Content1 />
-              <View style={[styles.upcomingExams, styles.examPreviewLayout]}>
-                <View style={[styles.examPreview, styles.examPreviewLayout]}>
-                  <View style={styles.examinfo}>
-                    <Text style={styles.examTitle}>Exam Title</Text>
-                    <Text
-                      style={[styles.dateTime, styles.uploadTypo]}
-                    >{`Date & Time`}</Text>
-                  </View>
-                  <Pressable style={styles.startbutton}>
-                    <Text style={[styles.upload, styles.uploadTypo]}>
-                      Upload
-                    </Text>
-                  </Pressable>
+        <View style={[styles.dashboard, styles.dashboardBg]}>
+          <View style={[styles.homeIndicator, styles.homeLayout]}>
+            <View
+              style={[
+                styles.spherobeforeafterHomeIndicator,
+                styles.examinfosectionPosition,
+              ]}
+            />
+          </View>
+          <View style={[styles.notch, styles.notchLayout]}>
+            <View style={styles.bg} />
+            <Exclude
+              style={styles.excludeIcon}
+              width={Width.width_375}
+              height={Height.height_44}
+            />
+            <Notch
+              style={[styles.notchIcon, styles.notchLayout]}
+              width={Width.width_219}
+              height={Height.height_30}
+            />
+          </View>
+          <View style={styles.iconsearch} />
+          <View style={styles.statusArea}>
+            <TopBar />
+            <Content1 />
+            <View style={[styles.upcomingExams, styles.examPreviewLayout]}>
+              <View style={[styles.examPreview, styles.examPreviewLayout]}>
+                <View style={styles.examinfo}>
+                  <Text style={styles.examTitle}>Exam Title</Text>
+                  <Text
+                    style={[styles.dateTime, styles.uploadTypo]}
+                  >{`Date & Time`}</Text>
                 </View>
+                <Pressable style={styles.startbutton}>
+                  <Text style={[styles.upload, styles.uploadTypo]}>Upload</Text>
+                </Pressable>
               </View>
             </View>
-            <View
-              style={[styles.examinfosection, styles.examinfosectionPosition]}
-            />
-            <ExamList />
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          <View
+            style={[styles.examinfosection, styles.examinfosectionPosition]}
+          />
+          <ExamList />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

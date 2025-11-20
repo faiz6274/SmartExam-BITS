@@ -3,25 +3,29 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  Platform,
+  KeyboardAvoidingView,
+  Dimensions,
   Pressable,
   Text,
-  Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import FrameComponent from "../components/FrameComponent";
 import Exclude from "../assets/Exclude.svg";
 import Notch from "../assets/Notch.svg";
 import RecordingIndicator from "../assets/Recording-Indicator.svg";
 import ReviewArea from "../components/ReviewArea";
 import {
+  Color,
+  FontSize,
+  Padding,
+  Border,
+  Gap,
   Height,
   Width,
-  Color,
-  Padding,
-  BoxShadow,
-  Border,
-  FontSize,
-  LineHeight,
   FontFamily,
+  LineHeight,
+  BoxShadow,
 } from "../GlobalStyles";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");

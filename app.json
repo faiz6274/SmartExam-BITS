@@ -14,9 +14,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -29,9 +27,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "platforms": [
-      "ios",
-      "android"
-    ]
+    "platforms": ["ios", "android"],
+    "newArchEnabled": true
   }
 }
