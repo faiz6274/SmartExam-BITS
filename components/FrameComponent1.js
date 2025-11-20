@@ -1,15 +1,8 @@
 import * as React from "react";
 import { StyleSheet, View, Text } from "react-native";
-import Exclude from "../assets/Exclude.svg";
+import Exclude1 from "../assets/Exclude1.svg";
 import Notch from "../assets/Notch.svg";
-import LeftSide1 from "../assets/Left-Side1.svg";
 import MobileSignal from "../assets/Mobile-Signal.svg";
-import Component9 from "../assets/";
-import Component10 from "../assets/";
-import Component11 from "../assets/";
-import BatteryBody from "../assets/Battery-Body.svg";
-import CombinedShape from "../assets/Combined-Shape.svg";
-import BatteryTerminal from "../assets/Battery-Terminal.svg";
 import RecordingIndicator from "../assets/Recording-Indicator.svg";
 import IconChevronLeft from "../assets/Icon-Chevron-Left.svg";
 import Upload from "./Upload";
@@ -33,7 +26,7 @@ const FrameComponent1 = () => {
           <View style={[styles.statusBar, styles.statusBarLayout]}>
             <View style={[styles.notch, styles.notchLayout]}>
               <View style={styles.bg} />
-              <Exclude
+              <Exclude1
                 style={[styles.excludeIcon, styles.statusBarLayout]}
                 width={Width.width_375}
                 height={Height.height_44}
@@ -44,11 +37,6 @@ const FrameComponent1 = () => {
                 height={Height.height_30}
               />
             </View>
-            <LeftSide1
-              style={styles.leftSideIcon}
-              width={Width.width_54}
-              height={Height.height_21}
-            />
             <View style={styles.rightStatusArea}>
               <View style={styles.rightSide}>
                 <MobileSignal
@@ -203,10 +191,6 @@ const styles = StyleSheet.create({
     color: Color.colorBlack,
     top: 0,
     position: "absolute",
-  },
-  leftSideIcon: {
-    height: Height.height_21,
-    width: Width.width_54,
   },
   rightStatusArea: {
     width: Width.width_66_7,
