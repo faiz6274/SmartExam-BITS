@@ -3,12 +3,13 @@ import {
   ScrollView,
   StyleSheet,
   View,
-  Text,
-  Platform,
   KeyboardAvoidingView,
+  Platform,
+  Dimensions,
 } from "react-native";
-import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Color, Padding } from "../GlobalStyles";
+import { Image } from "expo-image";
 import Exclude from "../assets/Exclude.svg";
 import Notch from "../assets/Notch.svg";
 import LeftSide from "../assets/Left-Side.svg";
@@ -19,28 +20,19 @@ import CombinedShape from "../assets/Combined-Shape.svg";
 import BatteryTerminal from "../assets/Battery-Terminal.svg";
 import RecordingIndicator from "../assets/Recording-Indicator.svg";
 import Content from "../components/Content";
-import {
-  Height,
-  Width,
-  Color,
-  Padding,
-  Gap,
-  Border,
-  FontSize,
-  LineHeight,
-  FontFamily,
-} from "../GlobalStyles";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const SignIn = () => {
   return (
-    <SafeAreaView style={styles.signInFlexBox}>
+    <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        style={styles.signInFlexBox}
+        style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          style={[styles.scrollview, styles.signInFlexBox]}
-          contentContainerStyle={styles.signInScrollViewContent}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
         >
           <View style={[styles.statusBar, styles.statusBarLayout]}>
             <View style={[styles.notch, styles.notchLayout]}>
@@ -117,6 +109,22 @@ const SignIn = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: Color.backgroundDefaultDefault,
+  },
+  scrollView: {
+    flex: 1,
+    width: "100%",
+  },
+  scrollContent: {
+    width: SCREEN_WIDTH, // ✅ Responsive
+    minHeight: SCREEN_HEIGHT, // ✅ Responsive
+    paddingHorizontal: Padding.padding_16,
+    paddingBottom: Padding.padding_20,
+    justifyContent: "center",
+  },
   signInScrollViewContent: {
     flexDirection: "column",
     alignItems: "center",
@@ -124,10 +132,6 @@ const styles = StyleSheet.create({
     gap: 49,
     height: 812,
     flex: 1,
-  },
-  signInFlexBox: {
-    flex: 1,
-    width: "100%",
   },
   statusBarLayout: {
     height: Height.height_44,
@@ -145,10 +149,6 @@ const styles = StyleSheet.create({
     top: 0,
     color: Color.colorBlack,
     position: "absolute",
-  },
-  scrollview: {
-    backgroundColor: Color.backgroundDefaultDefault,
-    maxWidth: "100%",
   },
   statusBar: {
     overflow: "hidden",

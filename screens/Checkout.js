@@ -5,6 +5,7 @@ import {
   View,
   Platform,
   KeyboardAvoidingView,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Exclude1 from "../assets/Exclude1.svg";
@@ -19,6 +20,9 @@ import StudentListSection from "../components/StudentListSection";
 import SubmissionDetail from "../components/SubmissionDetail";
 import CommentsGrading from "../components/CommentsGrading";
 import { Height, Width, Color, Border } from "../GlobalStyles";
+
+// Get actual device dimensions
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const Checkout = () => {
   return (
@@ -35,7 +39,7 @@ const Checkout = () => {
             <View style={[styles.bg, styles.bgBg]} />
             <Exclude1
               style={styles.excludeIcon}
-              width={378}
+              width={SCREEN_WIDTH}
               height={Height.height_44}
             />
             <Notch
@@ -75,7 +79,7 @@ const Checkout = () => {
             <View style={[styles.bg, styles.bgBg]} />
             <Exclude1
               style={styles.excludeIcon}
-              width={378}
+              width={SCREEN_WIDTH}
               height={Height.height_44}
             />
             <Notch
@@ -113,7 +117,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     alignItems: "flex-end",
     justifyContent: "flex-start",
-    height: 812,
+    height: SCREEN_HEIGHT, // ✅ Responsive
     flex: 1,
   },
   checkoutFlexBox: {
@@ -153,7 +157,7 @@ const styles = StyleSheet.create({
     display: "none",
   },
   excludeIcon: {
-    width: 378,
+    width: SCREEN_WIDTH, // ✅ Responsive
     height: Height.height_44,
     display: "none",
   },
@@ -211,22 +215,22 @@ const styles = StyleSheet.create({
     marginTop: -6,
   },
   submissionArea: {
-    width: Width.width_375,
-    height: 419,
+    width: SCREEN_WIDTH, // ✅ Responsive
+    height: SCREEN_HEIGHT * 0.52, // ✅ Dynamic percentage (52% of screen)
     marginTop: -6,
   },
   homeIndicator: {
     marginRight: -3,
-    width: Width.width_378_09,
+    width: SCREEN_WIDTH, // ✅ Responsive
     height: Height.height_34,
     flexDirection: "row",
     marginTop: -6,
   },
   checkoutHomeIndicator: {
     height: Height.height_5,
-    width: Width.width_134,
+    width: "30%", // ✅ Percentage-based instead of hard-coded width
     bottom: 8,
-    left: 122,
+    alignSelf: "center", // ✅ Center instead of left: 122
     borderRadius: Border.br_100,
   },
 });

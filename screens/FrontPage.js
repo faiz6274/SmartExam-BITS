@@ -1,5 +1,6 @@
 import * as React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View, Dimensions } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import View1 from "../components/View1";
 import Exclude from "../assets/Exclude.svg";
 import Notch from "../assets/Notch.svg";
@@ -10,7 +11,9 @@ import BatteryBody from "../assets/Battery-Body.svg";
 import CombinedShape from "../assets/Combined-Shape.svg";
 import BatteryTerminal from "../assets/Battery-Terminal.svg";
 import RecordingIndicator from "../assets/Recording-Indicator.svg";
-import { Height, Width, Color, Padding, Gap, Border } from "../GlobalStyles";
+import { Color, Padding, Border } from "../GlobalStyles";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const FrontPage = () => {
   return (
@@ -229,6 +232,17 @@ const styles = StyleSheet.create({
     right: 120,
     bottom: 8,
     borderRadius: Border.br_100,
+  },
+  container: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: Color.backgroundDefaultDefault,
+  },
+  contentContainer: {
+    width: SCREEN_WIDTH, // ✅ Responsive
+    minHeight: SCREEN_HEIGHT, // ✅ Responsive
+    paddingHorizontal: Padding.padding_16,
+    paddingVertical: Padding.padding_20,
   },
 });
 

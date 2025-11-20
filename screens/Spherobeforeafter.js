@@ -7,6 +7,7 @@ import {
   Pressable,
   Platform,
   KeyboardAvoidingView,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Exclude from "../assets/Exclude.svg";
@@ -26,16 +27,18 @@ import {
   BoxShadow,
 } from "../GlobalStyles";
 
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
 const Spherobeforeafter = () => {
   return (
-    <SafeAreaView style={styles.scrollviewFlexBox}>
+    <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={styles.scrollviewFlexBox}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          style={[styles.scrollview, styles.scrollviewFlexBox]}
-          contentContainerStyle={styles.spherobeforeafterScrollViewContent}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
         >
           <View style={[styles.dashboard, styles.dashboardBg]}>
             <View style={[styles.homeIndicator, styles.homeLayout]}>
@@ -91,6 +94,11 @@ const Spherobeforeafter = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: Color.backgroundDefaultDefault,
+  },
   spherobeforeafterScrollViewContent: {
     flexDirection: "row",
     alignItems: "center",
@@ -129,8 +137,14 @@ const styles = StyleSheet.create({
     height: Height.height_17,
     textAlign: "left",
   },
-  scrollview: {
-    maxWidth: "100%",
+  scrollView: {
+    flex: 1,
+    width: "100%",
+  },
+  scrollContent: {
+    width: SCREEN_WIDTH, // ✅ Responsive
+    minHeight: SCREEN_HEIGHT, // ✅ Responsive
+    paddingHorizontal: Padding.padding_16,
   },
   dashboard: {
     height: Height.height_812,

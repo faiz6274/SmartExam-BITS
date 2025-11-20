@@ -1,5 +1,12 @@
 import * as React from "react";
-import { ScrollView, StyleSheet, View, Pressable, Text } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  Pressable,
+  Text,
+  Dimensions,
+} from "react-native";
 import FrameComponent from "../components/FrameComponent";
 import Exclude from "../assets/Exclude.svg";
 import Notch from "../assets/Notch.svg";
@@ -16,6 +23,8 @@ import {
   LineHeight,
   FontFamily,
 } from "../GlobalStyles";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const Checkout1 = () => {
   return (
@@ -66,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     justifyContent: "flex-start",
     gap: 29,
-    height: 812,
+    height: SCREEN_HEIGHT,
     flex: 1,
   },
   notchLayout: {
@@ -93,7 +102,7 @@ const styles = StyleSheet.create({
   },
   excludeIcon: {
     height: Height.height_44,
-    width: Width.width_375,
+    width: SCREEN_WIDTH,
     display: "none",
   },
   notchIcon: {
@@ -109,26 +118,26 @@ const styles = StyleSheet.create({
     color: Color.colorDarkorange,
   },
   answerReview: {
-    width: 316,
-    height: 582,
+    width: SCREEN_WIDTH * 0.84,
+    height: SCREEN_HEIGHT * 0.72,
     paddingLeft: Padding.padding_24,
-    paddingBottom: 257,
+    paddingBottom: SCREEN_HEIGHT * 0.32,
     flexDirection: "row",
     zIndex: null,
   },
   submissionFooter: {
-    height: 86,
+    height: SCREEN_HEIGHT * 0.106,
     zIndex: null,
-    width: Width.width_375,
+    width: SCREEN_WIDTH,
   },
   buttonArea: {
-    width: 359,
-    height: 52,
+    width: SCREEN_WIDTH * 0.96,
+    height: SCREEN_HEIGHT * 0.064,
     paddingLeft: Padding.padding_16,
     flexDirection: "row",
   },
   button: {
-    width: 343,
+    width: "100%",
     boxShadow: BoxShadow.buttonShadow,
     elevation: 2,
     borderRadius: Border.br_8,
@@ -141,29 +150,27 @@ const styles = StyleSheet.create({
   },
   submit: {
     height: Height.height_24,
-    width: 57,
     fontSize: FontSize.fs_16,
     lineHeight: LineHeight.lh_24,
     fontWeight: "500",
     fontFamily: FontFamily.interMedium,
     color: Color.backgroundDefaultDefault,
-    textAlign: "left",
+    textAlign: "center",
     display: "flex",
     alignItems: "center",
   },
   homeIndicator: {
     height: Height.height_34,
     flexDirection: "row",
-    width: Width.width_375,
+    width: SCREEN_WIDTH,
   },
   checkoutHomeIndicator: {
     height: Height.height_5,
-    width: Width.width_134,
-    right: 120,
+    width: "30%",
     bottom: 8,
+    alignSelf: "center",
     borderRadius: Border.br_100,
     backgroundColor: Color.colorBlack,
-    position: "absolute",
   },
 });
 
