@@ -1,11 +1,14 @@
 import * as React from "react";
 import {
-  ScrollView,
   StyleSheet,
   View,
-  KeyboardAvoidingView,
-  Platform,
+  Text,
+  ScrollView,
   Dimensions,
+  Platform,
+  KeyboardAvoidingView,
+  Pressable,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -34,7 +37,7 @@ import Content from "../components/Content";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-const SignIn = () => {
+const SignIn = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -45,62 +48,6 @@ const SignIn = () => {
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
         >
-          <View style={[styles.statusBar, styles.statusBarLayout]}>
-            <View style={[styles.notch, styles.notchLayout]}>
-              <View style={[styles.bg, styles.bgPosition]} />
-              <Exclude
-                style={[styles.excludeIcon, styles.statusBarLayout]}
-                width={Width.width_375}
-                height={Height.height_44}
-              />
-              <Notch
-                style={[styles.notchIcon, styles.iconPosition]}
-                width={Width.width_219}
-                height={Height.height_30}
-              />
-            </View>
-            <LeftSide
-              style={styles.leftSideIcon}
-              width={Width.width_54}
-              height={Height.height_21}
-            />
-            <View style={styles.statusBarComponents}>
-              <View style={styles.rightSide}>
-                <MobileSignal
-                  style={styles.mobileSignalIcon}
-                  width={Width.width_17}
-                  height={Height.height_10_67}
-                />
-                <Wifi
-                  style={styles.wifiIcon}
-                  width={Width.width_15_27}
-                  height={Height.height_10_97}
-                />
-                <View style={styles.battery}>
-                  <BatteryBody
-                    style={[styles.batteryBodyIcon, styles.iconPosition]}
-                    width={Width.width_22}
-                    height={Height.height_11_33}
-                  />
-                  <CombinedShape
-                    style={styles.combinedShapeIcon}
-                    width={Width.width_1_33}
-                    height={Height.height_4}
-                  />
-                  <BatteryTerminal
-                    style={[styles.batteryCapIcon, styles.bgPosition]}
-                    width={Width.width_18}
-                    height={Height.height_7_33}
-                  />
-                </View>
-                <RecordingIndicator
-                  style={styles.recordingIndicatorIcon}
-                  width={Width.width_6}
-                  height={Height.height_6}
-                />
-              </View>
-            </View>
-          </View>
           <Image
             style={styles.aModernMinimalist3}
             contentFit="cover"
@@ -110,9 +57,6 @@ const SignIn = () => {
             <Text style={styles.createAccount}>Create account</Text>
           </View>
           <Content />
-          <View style={styles.homeIndicator}>
-            <View style={styles.signInHomeIndicator} />
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
