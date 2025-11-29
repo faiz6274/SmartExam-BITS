@@ -47,20 +47,32 @@ TEMPLATES = [{
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# PostgreSQL with AWS RDS
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'smartexam'),
-        'USER': os.getenv('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),  # AWS RDS endpoint
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-        'OPTIONS': {
-            'sslmode': 'require',  # AWS RDS requires SSL
+# Use SQLite locally OR PostgreSQL/AWS RDS
+USE_LOCAL_DB = os.getenv('USE_LOCAL_DB', 'true').lower() == 'true'
+
+if USE_LOCAL_DB:
+    # Local SQLite (default for testing)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
-}
+else:
+    # AWS RDS PostgreSQL (production)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', 'smartexam'),
+            'USER': os.getenv('POSTGRES_USER', 'admin'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+            'HOST': os.getenv('POSTGRES_HOST', 'smartexam.cbw2iqs8ejf6.ap-south-1.rds.amazonaws.com'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+            'OPTIONS': {
+                'sslmode': 'require',
+            }
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = []
 
