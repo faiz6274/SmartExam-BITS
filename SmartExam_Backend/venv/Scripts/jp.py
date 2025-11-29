@@ -1,4 +1,4 @@
-#!C:\Users\muham\Downloads\SmartExam_Backend_Scaffold\venv\Scripts\python.exe
+#!C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Scripts\python.exe
 
 import sys
 import json

@@ -1,0 +1,35 @@
+Traceback (most recent call last):
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\run_server.py", line 12, in <module>
+    call_command('runserver', '--noreload', '0.0.0.0:8000')
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\core\management\__init__.py", line 194, in call_command
+    return command.execute(*args, **defaults)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\core\management\commands\runserver.py", line 74, in execute
+    super().execute(*args, **options)
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\core\management\base.py", line 458, in execute
+    output = self.handle(*args, **options)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\core\management\commands\runserver.py", line 111, in handle
+    self.run(**options)
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\core\management\commands\runserver.py", line 120, in run
+    self.inner_run(None, **options)
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\core\management\commands\runserver.py", line 136, in inner_run
+    self.check_migrations()
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\core\management\base.py", line 574, in check_migrations
+    executor = MigrationExecutor(connections[DEFAULT_DB_ALIAS])
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\db\migrations\executor.py", line 18, in __init__
+    self.loader = MigrationLoader(self.connection)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\db\migrations\loader.py", line 58, in __init__
+    self.build_graph()
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\db\migrations\loader.py", line 229, in build_graph
+    self.load_disk()
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\db\migrations\loader.py", line 78, in load_disk
+    for app_config in apps.get_app_configs():
+                      ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\apps\registry.py", line 147, in get_app_configs
+    self.check_apps_ready()
+  File "C:\Users\muham\Downloads\SmartExam-BITS\SmartExam_Backend\venv\Lib\site-packages\django\apps\registry.py", line 138, in check_apps_ready
+    raise AppRegistryNotReady("Apps aren't loaded yet.")
+django.core.exceptions.AppRegistryNotReady: Apps aren't loaded yet.

@@ -36,7 +36,7 @@ class ExamViewSet(viewsets.ModelViewSet):
     """Exam management."""
     queryset = Exam.objects.all().prefetch_related('questions')
     serializer_class = ExamSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     
     def get_queryset(self):
         user = self.request.user
@@ -76,7 +76,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
     """Submission management."""
     queryset = Submission.objects.all().prefetch_related('files', 'comments')
     serializer_class = SubmissionSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     
     def get_queryset(self):
         user = self.request.user
@@ -85,7 +85,10 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         if user.is_superuser or role == 'instructor':
             return Submission.objects.all().prefetch_related('files', 'comments')
         # Students see only their own
-        return Submission.objects.filter(student=user).prefetch_related('files', 'comments')
+        if user.is_authenticated:
+            return Submission.objects.filter(student=user).prefetch_related('files', 'comments')
+        # Anonymous users get empty queryset
+        return Submission.objects.none()
     
     def perform_create(self, serializer):
         role = get_role(self.request.user)
@@ -127,7 +130,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Comment management."""
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     
     def get_queryset(self):
         user = self.request.user
@@ -136,7 +139,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         if user.is_superuser or role == 'instructor':
             return Comment.objects.all()
         # Students see comments on their submissions
-        return Comment.objects.filter(submission__student=user)
+        if user.is_authenticated:
+            return Comment.objects.filter(submission__student=user)
+        # Anonymous users get empty queryset
+        return Comment.objects.none()
     
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

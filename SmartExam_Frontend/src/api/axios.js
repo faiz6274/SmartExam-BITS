@@ -12,7 +12,8 @@ if (Platform.OS === "android") {
 } else if (Platform.OS === "ios") {
   API_BASE = "http://localhost:8000/api/";
 } else {
-  API_BASE = "http://192.168.1.23:8000/api/";
+  // Use your actual local IP instead of 10.0.2.2
+  API_BASE = "http://172.31.0.1:8000/api/";
 }
 
 const api = axios.create({
