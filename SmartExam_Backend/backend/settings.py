@@ -10,11 +10,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'dev-secret')
 DEBUG = os.getenv('DEBUG', '1') == '1'
-# Always include 'testserver' for Django's test client
-_default_hosts = 'localhost,127.0.0.1,0.0.0.0,testserver,10.0.2.2,192.168.1.23'
-ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', _default_hosts).split(',') if h.strip()]
-if 'testserver' not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append('testserver')
+# In DEBUG mode, allow all hosts
+if DEBUG:
+    ALLOWED_HOSTS = ['*']
+else:
+    # Production hosts
+    _default_hosts = 'localhost,127.0.0.1,192.168.1.30'
+    ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', _default_hosts).split(',') if h.strip()]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -35,13 +37,14 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.common.CommonMiddleware',  # Disabled - using custom HOST handling
+    # 'django.middleware.csrf.CsrfViewMiddleware',  # Disabled for API/mobile apps
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
+APPEND_SLASH = False  # Don't redirect /api/login to /api/login/
 TEMPLATES = [{
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
     'DIRS': [],
@@ -78,7 +81,23 @@ else:
         }
     }
 
-AUTH_PASSWORD_VALIDATORS = []
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -120,8 +139,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8000',
     'http://10.0.2.2:8000',  # Android emulator
     'http://127.0.0.1:8000',
-    'http://192.168.1.23:8000',  # Your PC on local network
-    'http://192.168.1.23:19006',  # Expo dev server
+    'http://192.168.1.30:8000',  # Your PC on local network
+    'http://192.168.1.30:19006',  # Expo dev server
 ]
 
 # For development - allow all origins

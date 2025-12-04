@@ -3,13 +3,17 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.views import APIView
-from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate, get_user_model
 from .models import Exam, Question, Submission, SubmissionFile, Comment
 from .serializers import (
     UserSerializer, ExamSerializer, QuestionSerializer, 
     SubmissionSerializer, SubmissionFileSerializer, CommentSerializer
 )
+import traceback
+import logging
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -25,11 +29,56 @@ class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
     
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            logger.debug(f"Register request received")
+            logger.debug(f"Request data: {request.data}")
+            logger.debug(f"Content-Type: {request.META.get('CONTENT_TYPE')}")
+            logger.debug(f"Body: {request.body}")
+            
+            serializer = UserSerializer(data=request.data)
+            if serializer.is_valid():
+                user = serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            logger.warning(f"Serializer errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Register error: {str(e)}")
+            logger.error(traceback.format_exc())
+            return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class LoginView(APIView):
+    """Custom login endpoint that returns JWT tokens."""
+    permission_classes = [permissions.AllowAny]
+    
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        
+        if not username or not password:
+            return Response(
+                {'detail': 'Username and password are required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Authenticate user
+        user = authenticate(username=username, password=password)
+        
+        if user is None:
+            return Response(
+                {'detail': 'Invalid username or password.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'username': user.username,
+            'role': user.role,
+        }, status=status.HTTP_200_OK)
 
 
 class ExamViewSet(viewsets.ModelViewSet):

@@ -3,6 +3,9 @@
     "name": "SmartExam",
     "slug": "smartexam",
     "version": "1.0.0",
-    "platforms": ["ios", "android", "web"]
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": ["**/*"],
+    "platforms": ["android", "web"]
   }
 }

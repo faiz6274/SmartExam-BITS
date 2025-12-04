@@ -8,6 +8,7 @@ class User(AbstractUser):
         ('admin', 'Admin'),
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+    email = models.EmailField(unique=True)  # Make email unique
 
     def is_student(self):
         return self.role == 'student'

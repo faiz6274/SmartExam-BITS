@@ -6,31 +6,42 @@ import { Platform } from "react-native";
 let API_BASE;
 
 if (Platform.OS === "android") {
-  // Android Emulator uses 10.0.2.2 to reach host machine
-  // Physical Android devices use the actual IP
-  API_BASE = "http://10.0.2.2:8000/api/";
+  // Android emulator - use host machine IP address
+  API_BASE = "http://192.168.1.30:8000/api/";
 } else if (Platform.OS === "ios") {
   API_BASE = "http://localhost:8000/api/";
 } else {
-  // Use your actual local IP instead of 10.0.2.2
-  API_BASE = "http://172.31.0.1:8000/api/";
+  // Fallback for web or other platforms
+  API_BASE = "http://localhost:8000/api/";
 }
 
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 30000, // Increased timeout
+  timeout: 30000,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
   },
+  // Don't require CSRF token for mobile app
+  xsrfCookieName: "", // Disable CSRF cookie
+  xsrfHeaderName: "", // Disable CSRF header
 });
 
 console.log("API Base URL:", API_BASE);
 
-// Attach access token to every request
+// Attach access token to every request (except public endpoints)
 api.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem("accessToken");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  // Don't attach token to public endpoints
+  const publicEndpoints = ["register/", "login/", "token/"];
+  const isPublicEndpoint = publicEndpoints.some((endpoint) =>
+    config.url.includes(endpoint)
+  );
+
+  if (!isPublicEndpoint) {
+    const token = await AsyncStorage.getItem("accessToken");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  }
+
   console.log("API Request:", config.url);
   return config;
 });
