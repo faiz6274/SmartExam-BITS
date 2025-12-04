@@ -139,7 +139,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8000',
     'http://10.0.2.2:8000',  # Android emulator
     'http://127.0.0.1:8000',
-    'http://192.168.1.30:8000',  # Your PC on local network
+    'http://192.168.1.30:8000',  #  PC on local network
     'http://192.168.1.30:19006',  # Expo dev server
 ]
 
@@ -153,31 +153,19 @@ MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/" if AWS_S3_CUSTOM_DOMAIN else '/me
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'DEBUG',
+        'level': 'WARNING',
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'propagate': False,
         },
     },
