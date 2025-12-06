@@ -267,9 +267,18 @@ export default function RegisterScreen({ navigation }) {
         password,
         role: role,
       });
-      Alert.alert("Success", "Account created. Please login.", [
-        { text: "OK", onPress: () => navigation.goBack() },
-      ]);
+      Alert.alert(
+        "✨ Account Created Successfully!",
+        `Welcome to SmartExam, ${username}!\n\nYour account has been created as a ${role}.\n\nPlease login with your credentials to get started.`,
+        [
+          {
+            text: "Login Now",
+            onPress: () => navigation.goBack(),
+            style: "default",
+          },
+        ],
+        { cancelable: false }
+      );
     } catch (e) {
       console.error("Registration error:", e);
       console.error("Response data:", e.response?.data);

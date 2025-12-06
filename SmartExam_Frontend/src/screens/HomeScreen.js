@@ -110,61 +110,65 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <View style={styles.cardContainer}>
-          {/* Scan & Submit Card */}
-          <TouchableOpacity
-            style={[styles.card, styles.glowBorder]}
-            onPress={() => navigation.navigate("Scanner", { examId: 1 })}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={["#1a4d7f", "#0d2a4a"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardGradient}
+          {/* Scan & Submit Card - Only for Students */}
+          {userRole === "student" && (
+            <TouchableOpacity
+              style={[styles.card, styles.glowBorder]}
+              onPress={() => navigation.navigate("Scanner", { examId: 1 })}
+              activeOpacity={0.8}
             >
-              <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>Scan & Submit</Text>
-                <Text style={styles.cardDescription}>
-                  Capture and submit your exam papers
-                </Text>
-              </View>
-              <View style={styles.cardIcon}>
-                <MaterialCommunityIcons
-                  name="camera-plus"
-                  size={32}
-                  color="#64c8ff"
-                />
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
+              <LinearGradient
+                colors={["#1a4d7f", "#0d2a4a"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.cardGradient}
+              >
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>Scan & Submit</Text>
+                  <Text style={styles.cardDescription}>
+                    Capture and submit your exam papers
+                  </Text>
+                </View>
+                <View style={styles.cardIcon}>
+                  <MaterialCommunityIcons
+                    name="camera-plus"
+                    size={32}
+                    color="#64c8ff"
+                  />
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
 
-          {/* My Submissions Card */}
-          <TouchableOpacity
-            style={[styles.card, styles.glowBorder]}
-            onPress={() => navigation.navigate("Submissions")}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={["#2d5a3d", "#1a3a24"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.cardGradient}
+          {/* My Submissions Card - Only for Students */}
+          {userRole === "student" && (
+            <TouchableOpacity
+              style={[styles.card, styles.glowBorder]}
+              onPress={() => navigation.navigate("Submissions")}
+              activeOpacity={0.8}
             >
-              <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>My Submissions</Text>
-                <Text style={styles.cardDescription}>
-                  View your submitted exams and grades
-                </Text>
-              </View>
-              <View style={styles.cardIcon}>
-                <MaterialCommunityIcons
-                  name="file-document-outline"
-                  size={32}
-                  color="#7cff7c"
-                />
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
+              <LinearGradient
+                colors={["#2d5a3d", "#1a3a24"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.cardGradient}
+              >
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>My Submissions</Text>
+                  <Text style={styles.cardDescription}>
+                    View your submitted exams and grades
+                  </Text>
+                </View>
+                <View style={styles.cardIcon}>
+                  <MaterialCommunityIcons
+                    name="file-document-outline"
+                    size={32}
+                    color="#7cff7c"
+                  />
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
 
           {/* Instructor View Card */}
           {userRole === "instructor" && (

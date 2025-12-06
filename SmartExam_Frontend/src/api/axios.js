@@ -6,8 +6,8 @@ import { Platform } from "react-native";
 let API_BASE;
 
 if (Platform.OS === "android") {
-  // Android emulator - use host machine IP address
-  API_BASE = "http://192.168.1.30:8000/api/";
+  // Android emulator - use special IP to reach host machine
+  API_BASE = "http://10.0.2.2:8000/api/";
 } else if (Platform.OS === "ios") {
   API_BASE = "http://localhost:8000/api/";
 } else {

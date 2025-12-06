@@ -283,7 +283,10 @@ export default function LoginScreen({ navigation }) {
 
           <TouchableOpacity
             style={styles.registerButton}
-            onPress={() => navigation.navigate("Register")}
+            onPress={() => {
+              console.log("Register button pressed");
+              navigation.navigate("Register");
+            }}
             disabled={loading}
             activeOpacity={0.8}
           >

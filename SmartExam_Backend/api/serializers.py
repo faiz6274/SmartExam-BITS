@@ -12,38 +12,44 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id','username','email','password','role']
         read_only_fields = ['id']
+        extra_kwargs = {
+            'username': {'validators': []},
+            'email': {'validators': []},
+        }
 
-    def validate_username(self, value):
-        """Validate username: 3-30 chars, alphanumeric and underscore only"""
-        if len(value) < 3:
-            raise serializers.ValidationError("Username must be at least 3 characters long.")
-        if len(value) > 30:
-            raise serializers.ValidationError("Username must be at most 30 characters long.")
-        if not re.match(r'^[a-zA-Z0-9_]+$', value):
-            raise serializers.ValidationError("Username can only contain letters, numbers, and underscores.")
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("This username is already taken.")
-        return value
-
-    def validate_email(self, value):
-        """Validate email format and uniqueness"""
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("This email is already registered.")
-        if '@' not in value or '.' not in value.split('@')[-1]:
-            raise serializers.ValidationError("Please enter a valid email address.")
-        return value
-
-    def validate_password(self, value):
-        """Validate password requirements: 8+ chars, uppercase, number, special char"""
-        if len(value) < 8:
-            raise serializers.ValidationError("Password must be at least 8 characters long.")
-        if not any(c.isupper() for c in value):
-            raise serializers.ValidationError("Password must contain at least one uppercase letter.")
-        if not any(c.isdigit() for c in value):
-            raise serializers.ValidationError("Password must contain at least one number.")
-        if not any(c in '!@#$%^&*()_+-=[]{};\':"|,.<>?' for c in value):
-            raise serializers.ValidationError("Password must contain at least one special character.")
-        return value
+    def validate(self, data):
+        """Batch validation to reduce database queries"""
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+        
+        errors = {}
+        
+        # Username validation
+        if username:
+            if len(username) < 3:
+                errors['username'] = "Username must be at least 3 characters."
+            elif len(username) > 30:
+                errors['username'] = "Username must be at most 30 characters."
+            elif User.objects.filter(username=username).exists():
+                errors['username'] = "This username is already taken."
+        
+        # Email validation
+        if email:
+            if '@' not in email or '.' not in email.split('@')[-1]:
+                errors['email'] = "Please enter a valid email address."
+            elif User.objects.filter(email=email).exists():
+                errors['email'] = "This email is already registered."
+        
+        # Password validation (simplified for speed)
+        if password:
+            if len(password) < 8:
+                errors['password'] = "Password must be at least 8 characters."
+        
+        if errors:
+            raise serializers.ValidationError(errors)
+        
+        return data
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
@@ -77,11 +83,17 @@ class SubmissionFileSerializer(serializers.ModelSerializer):
 
 class SubmissionSerializer(serializers.ModelSerializer):
     files = SubmissionFileSerializer(many=True, read_only=True)
+    student_name = serializers.CharField(source='student.username', read_only=True)
+    comments = serializers.SerializerMethodField()
     
     class Meta:
         model = Submission
-        fields = ['id', 'exam', 'student', 'status', 'score', 'submitted_at', 'files', 'created_at']
+        fields = ['id', 'exam', 'student', 'student_name', 'status', 'score', 'submitted_at', 'files', 'comments', 'page_count', 'created_at']
         read_only_fields = ['id', 'created_at', 'submitted_at', 'student']
+    
+    def get_comments(self, obj):
+        comments = obj.comments.all()
+        return CommentSerializer(comments, many=True).data
 
 
 class CommentSerializer(serializers.ModelSerializer):

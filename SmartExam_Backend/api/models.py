@@ -62,6 +62,7 @@ class Submission(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='exam_submissions')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress')
     score = models.FloatField(null=True, blank=True)
+    page_count = models.IntegerField(default=0, help_text="Number of pages in submission")
     submitted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

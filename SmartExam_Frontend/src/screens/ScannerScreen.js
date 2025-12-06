@@ -1,57 +1,623 @@
-import React, { useState } from 'react';
-import { View, Button, Image, ScrollView, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import * as ImageManipulator from 'expo-image-manipulator';
-import api from '../api/axios';
+import React, { useState, useRef } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Image,
+  Alert,
+  ActivityIndicator,
+  FlatList,
+  Slider,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
+import * as FileSystem from "expo-file-system";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import api from "../api/axios";
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#0f0f1e",
+  },
+  header: {
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(100, 200, 255, 0.2)",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "900",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#999",
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#64c8ff",
+    marginBottom: 12,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  captureButton: {
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  buttonGradient: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  imageGrid: {
+    gap: 12,
+  },
+  imageCard: {
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#1a1a2e",
+    borderWidth: 1,
+    borderColor: "rgba(100, 200, 255, 0.2)",
+  },
+  imagePreview: {
+    width: "100%",
+    height: 180,
+    backgroundColor: "#0f0f1e",
+  },
+  imageOverlay: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  emptyIcon: {
+    marginBottom: 16,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
+    textAlign: "center",
+  },
+  submitButton: {
+    borderRadius: 12,
+    overflow: "hidden",
+    marginVertical: 20,
+  },
+  submitButtonGradient: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  stats: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 12,
+  },
+  statCard: {
+    flex: 1,
+    borderRadius: 10,
+    padding: 12,
+    backgroundColor: "rgba(100, 200, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(100, 200, 255, 0.2)",
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#64c8ff",
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: "#999",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  compressionSection: {
+    backgroundColor: "rgba(100, 200, 255, 0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(100, 200, 255, 0.2)",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  compressionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#64c8ff",
+    marginBottom: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  compressionSlider: {
+    marginVertical: 12,
+  },
+  sliderLabel: {
+    fontSize: 12,
+    color: "#bbb",
+    marginBottom: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  sliderInfo: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 12,
+  },
+  infoBox: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    borderRadius: 8,
+    padding: 10,
+  },
+  infoLabel: {
+    fontSize: 10,
+    color: "#999",
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#64c8ff",
+  },
+});
 
 export default function ScannerScreen({ route, navigation }) {
   const { examId } = route.params || { examId: 1 };
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [compressionQuality, setCompressionQuality] = useState(0.75);
+  const [compressionStats, setCompressionStats] = useState({});
+  const scrollViewRef = useRef(null);
 
   const pickImage = async () => {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert('Permission needed', 'Camera access is required to scan pages');
-      return;
-    }
-    const result = await ImagePicker.launchCameraAsync({ allowsEditing: false, quality: 1 });
-    if (!result.cancelled) {
-      const manipResult = await ImageManipulator.manipulateAsync(result.uri, [{ resize: { width: 1600 } }], { compress: 0.9, format: ImageManipulator.SaveFormat.JPEG });
-      setImages(prev => [...prev, manipResult.uri]);
+    try {
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert(
+          "Permission Denied",
+          "Camera access is required to scan documents"
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [8.5, 11],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        const newImages = result.assets.map((asset) => ({
+          id: Date.now() + Math.random(),
+          uri: asset.uri,
+          timestamp: new Date().toLocaleTimeString(),
+        }));
+
+        setImages([...images, ...newImages]);
+        setTimeout(
+          () => scrollViewRef.current?.scrollToEnd({ animated: true }),
+          100
+        );
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to capture image: " + error.message);
     }
   };
 
-  const upload = async () => {
-    if (images.length === 0) { Alert.alert('No pages', 'Please capture at least one page'); return; }
-    try {
-      const subRes = await api.post('submissions/', { exam: examId });
-      const submissionId = subRes.data.id;
+  const removeImage = (id) => {
+    setImages(images.filter((img) => img.id !== id));
+  };
 
-      const form = new FormData();
-      images.forEach((uri, i) => {
-        form.append('files', {
-          uri,
-          name: `page_${i+1}.jpg`,
-          type: 'image/jpeg',
+  const compressImage = async (imageUri) => {
+    try {
+      // Get original file size
+      const originalFileInfo = await FileSystem.getInfoAsync(imageUri);
+      const originalSize = originalFileInfo.size || 0;
+
+      // Compress the image
+      const compressed = await ImageManipulator.manipulateAsync(
+        imageUri,
+        [
+          {
+            resize: {
+              width: 1920,
+              height: 2560,
+            },
+          },
+        ],
+        {
+          compress: compressionQuality,
+          format: ImageManipulator.SaveFormat.JPEG,
+        }
+      );
+
+      // Get compressed file size
+      const compressedFileInfo = await FileSystem.getInfoAsync(compressed.uri);
+      const compressedSize = compressedFileInfo.size || 0;
+
+      // Calculate compression stats
+      const compressionPercent = Math.round(
+        ((originalSize - compressedSize) / originalSize) * 100
+      );
+
+      return {
+        uri: compressed.uri,
+        originalSize,
+        compressedSize,
+        compressionPercent,
+      };
+    } catch (error) {
+      console.error("Compression error:", error);
+      // Return original if compression fails
+      return {
+        uri: imageUri,
+        originalSize: 0,
+        compressedSize: 0,
+        compressionPercent: 0,
+      };
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (images.length === 0) {
+      Alert.alert(
+        "No Documents",
+        "Please scan at least one document before submitting."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Confirm Submission",
+      `You are about to submit ${images.length} document(s). This action cannot be undone.`,
+      [
+        { text: "Cancel", onPress: () => {} },
+        {
+          text: "Submit",
+          onPress: async () => {
+            await submitExamPapers();
+          },
+        },
+      ]
+    );
+  };
+
+  const submitExamPapers = async () => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      const stats = {};
+
+      // Compress and add each image to form data
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+
+        // Compress image
+        const compressedData = await compressImage(image.uri);
+
+        // Store compression stats
+        stats[`page_${i + 1}`] = {
+          original: compressedData.originalSize,
+          compressed: compressedData.compressedSize,
+          percent: compressedData.compressionPercent,
+        };
+
+        formData.append("documents", {
+          uri: compressedData.uri,
+          type: "image/jpeg",
+          name: `page_${i + 1}.jpg`,
         });
+      }
+
+      // Store compression stats for display
+      setCompressionStats(stats);
+
+      // Add metadata
+      formData.append("page_count", images.length);
+      formData.append("submitted_at", new Date().toISOString());
+      formData.append("compression_quality", compressionQuality);
+
+      const response = await api.post("submissions/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      await api.post(`submissions/${submissionId}/upload_files/`, form, { headers: { 'Content-Type': 'multipart/form-data' } });
-      Alert.alert('Success', 'Submission uploaded');
-      navigation.goBack();
-    } catch (err) {
-      console.error(err);
-      Alert.alert('Upload failed');
+      setLoading(false);
+      Alert.alert(
+        "Success",
+        "Your exam papers have been submitted successfully!",
+        [
+          {
+            text: "OK",
+            onPress: () => navigation.navigate("Submissions"),
+          },
+        ]
+      );
+      setImages([]);
+    } catch (error) {
+      setLoading(false);
+      console.error("Submission error:", error);
+      Alert.alert(
+        "Submission Failed",
+        error.response?.data?.detail ||
+          error.message ||
+          "Failed to submit papers"
+      );
     }
   };
 
   return (
-    <View style={{ flex: 1, padding: 12 }}>
-      <Button title="Capture Page" onPress={pickImage} />
-      <Button title="Upload Submission" onPress={upload} />
-      <ScrollView horizontal>
-        {images.map((uri, i) => <Image key={i} source={{ uri }} style={{ width: 200, height: 280, margin: 8 }} />)}
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Scan Documents</Text>
+        <Text style={styles.subtitle}>
+          Capture clear photos of all your exam sheets
+        </Text>
+      </View>
+
+      <ScrollView
+        ref={scrollViewRef}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Capture Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>📸 Capture</Text>
+          <TouchableOpacity
+            style={styles.captureButton}
+            onPress={() => pickImage()}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={["#1a4d7f", "#0d2a4a"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.buttonGradient}
+            >
+              <MaterialCommunityIcons name="camera" size={20} color="#64c8ff" />
+              <Text style={styles.buttonText}>Take Photo</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
+        {/* Stats */}
+        {images.length > 0 && (
+          <View style={styles.stats}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{images.length}</Text>
+              <Text style={styles.statLabel}>Pages Scanned</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>
+                {(images.length * 2.5).toFixed(1)}
+              </Text>
+              <Text style={styles.statLabel}>Est. MB</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Compression Settings */}
+        {images.length > 0 && (
+          <View style={styles.compressionSection}>
+            <Text style={styles.compressionTitle}>🗜️ Compression</Text>
+
+            <View style={styles.sliderLabel}>
+              <Text style={{ fontSize: 12, color: "#bbb" }}>Quality</Text>
+              <Text
+                style={{ fontSize: 12, color: "#64c8ff", fontWeight: "600" }}
+              >
+                {Math.round(compressionQuality * 100)}%
+              </Text>
+            </View>
+
+            <Slider
+              style={styles.compressionSlider}
+              minimumValue={0.5}
+              maximumValue={1}
+              step={0.05}
+              value={compressionQuality}
+              onValueChange={setCompressionQuality}
+              minimumTrackTintColor="#64c8ff"
+              maximumTrackTintColor="rgba(100, 200, 255, 0.2)"
+              thumbTintColor="#64c8ff"
+            />
+
+            <Text
+              style={{
+                fontSize: 10,
+                color: "#999",
+                textAlign: "center",
+                marginTop: 8,
+              }}
+            >
+              Lower = smaller files | Higher = better quality
+            </Text>
+
+            {Object.keys(compressionStats).length > 0 && (
+              <View style={styles.sliderInfo}>
+                <View style={styles.infoBox}>
+                  <Text style={styles.infoLabel}>Total Saved</Text>
+                  <Text style={styles.infoValue}>
+                    {Object.values(compressionStats).reduce(
+                      (sum, s) => sum + (s.original - s.compressed),
+                      0
+                    ) /
+                      (1024 * 1024) >
+                    0
+                      ? (
+                          Object.values(compressionStats).reduce(
+                            (sum, s) => sum + (s.original - s.compressed),
+                            0
+                          ) /
+                          (1024 * 1024)
+                        ).toFixed(2)
+                      : "0"}
+                    MB
+                  </Text>
+                </View>
+                <View style={styles.infoBox}>
+                  <Text style={styles.infoLabel}>Avg. Compression</Text>
+                  <Text style={styles.infoValue}>
+                    {Object.values(compressionStats).length > 0
+                      ? (
+                          Object.values(compressionStats).reduce(
+                            (sum, s) => sum + s.percent,
+                            0
+                          ) / Object.values(compressionStats).length
+                        ).toFixed(0)
+                      : "0"}
+                    %
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Documents Preview */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>📄 Documents</Text>
+
+          {images.length === 0 ? (
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIcon}>
+                <MaterialCommunityIcons
+                  name="folder-open"
+                  size={48}
+                  color="#666"
+                />
+              </View>
+              <Text style={styles.emptyText}>
+                No documents yet.{"\n"}
+                Capture or import exam papers
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              scrollEnabled={false}
+              data={images}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item, index }) => (
+                <View style={styles.imageCard}>
+                  <Image
+                    source={{ uri: item.uri }}
+                    style={styles.imagePreview}
+                  />
+                  <TouchableOpacity
+                    style={styles.imageOverlay}
+                    onPress={() => removeImage(item.id)}
+                  >
+                    <MaterialCommunityIcons
+                      name="close"
+                      size={20}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                  <View style={{ padding: 12, backgroundColor: "#1a1a2e" }}>
+                    <Text style={{ color: "#999", fontSize: 12 }}>
+                      Page {index + 1} • {item.timestamp}
+                    </Text>
+                  </View>
+                </View>
+              )}
+              ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+              contentContainerStyle={styles.imageGrid}
+            />
+          )}
+        </View>
+
+        {/* Submit Button */}
+        {images.length > 0 && (
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handleSubmit}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={["#c94f2e", "#8b3820"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.submitButtonGradient}
+            >
+              <MaterialCommunityIcons
+                name="cloud-upload"
+                size={22}
+                color="#fff"
+              />
+              <Text style={styles.submitButtonText}>
+                Submit {images.length} Page(s)
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
       </ScrollView>
+
+      {/* Loading Overlay */}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <View style={{ alignItems: "center" }}>
+            <ActivityIndicator size="large" color="#64c8ff" />
+            <Text style={{ color: "#fff", marginTop: 12, fontSize: 14 }}>
+              Uploading documents...
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }

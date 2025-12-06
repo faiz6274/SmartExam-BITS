@@ -1,63 +1,627 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, TextInput, Alert } from 'react-native';
-import api from '../api/axios';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  FlatList,
+  TextInput,
+  Alert,
+  ActivityIndicator,
+  Image,
+  Modal,
+  Dimensions,
+} from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import api from "../api/axios";
 
-export default function InstructorScreen({ route, navigation }) {
-  const submission = route.params?.submission;
-  const [details, setDetails] = useState(null);
-  const [comment, setComment] = useState('');
+const { width, height } = Dimensions.get("window");
 
-  const load = async () => {
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#0f0f1e",
+  },
+  header: {
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(100, 200, 255, 0.2)",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "900",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#999",
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#64c8ff",
+    marginBottom: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  submissionCard: {
+    backgroundColor: "rgba(100, 200, 255, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(100, 200, 255, 0.2)",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  submissionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  studentName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    backgroundColor: "rgba(124, 255, 124, 0.2)",
+    borderWidth: 1,
+    borderColor: "#7cff7c",
+  },
+  statusText: {
+    fontSize: 11,
+    color: "#7cff7c",
+    fontWeight: "600",
+  },
+  submissionInfo: {
+    fontSize: 12,
+    color: "#bbb",
+    marginBottom: 8,
+  },
+  fileCount: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#64c8ff",
+    marginBottom: 12,
+  },
+  button: {
+    backgroundColor: "rgba(100, 200, 255, 0.15)",
+    borderWidth: 1.5,
+    borderColor: "#64c8ff",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginRight: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#64c8ff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  modal: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#0f0f1e",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: height * 0.85,
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(100, 200, 255, 0.2)",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  closeButton: {
+    padding: 8,
+  },
+  filePreview: {
+    width: "100%",
+    height: 300,
+    backgroundColor: "#1a1a2e",
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  fileName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 16,
+  },
+  commentsSection: {
+    marginTop: 16,
+  },
+  commentsTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#64c8ff",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  commentCard: {
+    backgroundColor: "rgba(100, 200, 255, 0.08)",
+    borderLeftWidth: 3,
+    borderLeftColor: "#64c8ff",
+    padding: 12,
+    marginBottom: 10,
+    borderRadius: 8,
+  },
+  commentAuthor: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#64c8ff",
+    marginBottom: 4,
+  },
+  commentTime: {
+    fontSize: 10,
+    color: "#999",
+    marginBottom: 6,
+  },
+  commentText: {
+    fontSize: 13,
+    color: "#ddd",
+    lineHeight: 18,
+  },
+  commentInput: {
+    backgroundColor: "rgba(100, 200, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(100, 200, 255, 0.3)",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: "#fff",
+    fontSize: 13,
+    marginBottom: 12,
+    maxHeight: 100,
+  },
+  submitCommentButton: {
+    height: 44,
+    borderRadius: 10,
+    overflow: "hidden",
+    marginBottom: 12,
+  },
+  submitCommentGradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  submitCommentText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+    marginLeft: 8,
+  },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  emptyIcon: {
+    marginBottom: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  tabButtons: {
+    flexDirection: "row",
+    marginBottom: 16,
+    gap: 8,
+  },
+  tabButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(100, 200, 255, 0.3)",
+  },
+  tabButtonActive: {
+    backgroundColor: "rgba(100, 200, 255, 0.2)",
+    borderColor: "#64c8ff",
+  },
+  tabButtonText: {
+    fontSize: 12,
+    color: "#999",
+    fontWeight: "600",
+  },
+  tabButtonTextActive: {
+    color: "#64c8ff",
+  },
+});
+
+export default function InstructorScreen({ navigation }) {
+  const [submissions, setSubmissions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [currentFile, setCurrentFile] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [comment, setComment] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [view, setView] = useState("submissions"); // "submissions" or "exams"
+
+  const fetchSubmissions = async () => {
+    setLoading(true);
     try {
-      const res = await api.get(`submissions/${submission.id}/`);
-      setDetails(res.data);
-    } catch (e) { console.error(e); }
+      const res = await api.get("submissions/");
+      setSubmissions(res.data);
+    } catch (e) {
+      console.error("Error fetching submissions:", e);
+      Alert.alert("Error", "Failed to fetch submissions");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const postComment = async () => {
-    if (!comment.trim()) return Alert.alert('Empty', 'Please enter a comment');
-    try {
-      await api.post('comments/', { submission: submission.id, text: comment });
-      setComment('');
-      load();
-      Alert.alert('Saved', 'Comment added');
-    } catch (e) { console.error(e); Alert.alert('Failed', 'Could not add comment.'); }
+  const refreshSubmissions = async () => {
+    await fetchSubmissions();
   };
 
-  useEffect(() => { if (submission) load(); }, [submission]);
+  useEffect(() => {
+    fetchSubmissions();
+  }, []);
 
-  if (!submission) return <View><Text style={{ padding: 16 }}>No submission selected</Text></View>;
+  const handleViewSubmission = (submission) => {
+    setSelectedSubmission(submission);
+    if (submission.files && submission.files.length > 0) {
+      setCurrentFile(submission.files[0]);
+    }
+    setShowModal(true);
+  };
+
+  const handleAddComment = async () => {
+    if (!comment.trim()) {
+      Alert.alert("Empty", "Please enter a comment");
+      return;
+    }
+
+    setSubmittingComment(true);
+    try {
+      await api.post("comments/", {
+        submission: selectedSubmission.id,
+        text: comment,
+      });
+
+      setComment("");
+      // Refresh submission details
+      const res = await api.get(`submissions/${selectedSubmission.id}/`);
+      setSelectedSubmission(res.data);
+      Alert.alert("Success", "Comment added successfully");
+    } catch (e) {
+      console.error("Error adding comment:", e);
+      Alert.alert("Error", "Failed to add comment");
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Instructor Panel</Text>
+          <Text style={styles.subtitle}>Review student submissions</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#64c8ff" />
+        </View>
+      </View>
+    );
+  }
 
   return (
-    <View style={{ flex: 1, padding: 12 }}>
-      {details ? (
-        <>
-          <Text style={{ fontWeight: '700' }}>Submission #{details.id}</Text>
-          <Text>Student: {details.student}</Text>
-          <Text>Files:</Text>
-          <FlatList data={details.files} keyExtractor={(f) => String(f.id)} renderItem={({ item }) => (
-            <View style={{ padding: 8 }}>
-              <Button title={`Open file ${item.id}`} onPress={() => {
-                // open S3 link in browser via Linking
-                // import Linking from 'react-native' if you want to open
-              }} />
-            </View>
-          )} />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Instructor Panel</Text>
+        <Text style={styles.subtitle}>Review student submissions</Text>
+      </View>
 
-          <Text style={{ marginTop: 12 }}>Comments</Text>
-          <FlatList data={details.comments} keyExtractor={(c) => String(c.id)} renderItem={({ item }) => (
-            <View style={{ padding: 8 }}>
-              <Text style={{ fontWeight: '600' }}>{item.instructor}</Text>
-              <Text>{item.text}</Text>
-            </View>
-          )} ListEmptyComponent={() => <Text style={{ padding: 8 }}>No comments yet</Text>} />
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        onMomentumScrollEnd={refreshSubmissions}
+      >
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            📋 Student Submissions ({submissions.length})
+          </Text>
 
-          <TextInput placeholder="Add comment" value={comment} onChangeText={setComment} style={{ borderWidth: 1, padding: 8, marginTop: 8 }} />
-          <Button title="Save Comment" onPress={postComment} />
-        </>
-      ) : (
-        <Text>Loading...</Text>
-      )}
+          {submissions.length === 0 ? (
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIcon}>
+                <MaterialCommunityIcons
+                  name="folder-open"
+                  size={48}
+                  color="#666"
+                />
+              </View>
+              <Text style={styles.emptyText}>No submissions yet</Text>
+            </View>
+          ) : (
+            <FlatList
+              scrollEnabled={false}
+              data={submissions}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.submissionCard}>
+                  <View style={styles.submissionHeader}>
+                    <Text style={styles.studentName}>
+                      {item.student_name || `Student #${item.student}`}
+                    </Text>
+                    <View style={styles.statusBadge}>
+                      <Text style={styles.statusText}>{item.status}</Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.submissionInfo}>
+                    📄 {item.page_count || 0} pages
+                  </Text>
+                  <Text style={styles.submissionInfo}>
+                    🕒{" "}
+                    {item.submitted_at
+                      ? new Date(item.submitted_at).toLocaleDateString() +
+                        " " +
+                        new Date(item.submitted_at).toLocaleTimeString()
+                      : "Not submitted"}
+                  </Text>
+
+                  {item.files && item.files.length > 0 && (
+                    <Text style={styles.fileCount}>
+                      📎 {item.files.length} file(s) attached
+                    </Text>
+                  )}
+
+                  <View style={{ flexDirection: "row" }}>
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={() => handleViewSubmission(item)}
+                    >
+                      <MaterialCommunityIcons
+                        name="eye"
+                        size={14}
+                        color="#64c8ff"
+                      />
+                      <Text style={[styles.buttonText, { marginLeft: 4 }]}>
+                        Review
+                      </Text>
+                    </TouchableOpacity>
+
+                    {item.comments && item.comments.length > 0 && (
+                      <TouchableOpacity
+                        style={[
+                          styles.button,
+                          {
+                            borderColor: "#7cff7c",
+                            backgroundColor: "rgba(124, 255, 124, 0.1)",
+                          },
+                        ]}
+                      >
+                        <MaterialCommunityIcons
+                          name="comment-multiple"
+                          size={14}
+                          color="#7cff7c"
+                        />
+                        <Text
+                          style={[
+                            styles.buttonText,
+                            { color: "#7cff7c", marginLeft: 4 },
+                          ]}
+                        >
+                          {item.comments.length}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              )}
+            />
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Submission Review Modal */}
+      <Modal
+        visible={showModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => {
+          setShowModal(false);
+          setSelectedSubmission(null);
+          setCurrentFile(null);
+        }}
+      >
+        <View style={styles.modal}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>
+                  {selectedSubmission?.student_name || "Student"}
+                </Text>
+                <Text style={{ fontSize: 11, color: "#999", marginTop: 2 }}>
+                  {selectedSubmission?.page_count || 0} pages submitted
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => {
+                  setShowModal(false);
+                  setSelectedSubmission(null);
+                  setCurrentFile(null);
+                }}
+              >
+                <MaterialCommunityIcons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={{ paddingHorizontal: 20 }}>
+              {/* File Navigation */}
+              {selectedSubmission?.files &&
+                selectedSubmission.files.length > 0 && (
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>📁 Files</Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={{ marginBottom: 16 }}
+                    >
+                      {selectedSubmission.files.map((file, idx) => (
+                        <TouchableOpacity
+                          key={file.id}
+                          style={[
+                            styles.button,
+                            {
+                              marginRight: 8,
+                              backgroundColor:
+                                currentFile?.id === file.id
+                                  ? "rgba(100, 200, 255, 0.2)"
+                                  : "rgba(100, 200, 255, 0.08)",
+                              borderColor:
+                                currentFile?.id === file.id
+                                  ? "#64c8ff"
+                                  : "rgba(100, 200, 255, 0.2)",
+                            },
+                          ]}
+                          onPress={() => setCurrentFile(file)}
+                        >
+                          <Text style={styles.buttonText}>Page {idx + 1}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+
+                    {currentFile && (
+                      <>
+                        <Text style={styles.fileName}>
+                          📄{" "}
+                          {currentFile.file?.split("/").pop() ||
+                            "Submitted file"}
+                        </Text>
+                        {currentFile.file && (
+                          <Image
+                            source={{ uri: currentFile.file }}
+                            style={styles.filePreview}
+                            resizeMode="contain"
+                          />
+                        )}
+                      </>
+                    )}
+                  </View>
+                )}
+
+              {/* Comments Section */}
+              <View style={styles.commentsSection}>
+                <Text style={styles.commentsTitle}>
+                  💬 Comments ({selectedSubmission?.comments?.length || 0})
+                </Text>
+
+                {selectedSubmission?.comments &&
+                selectedSubmission.comments.length > 0 ? (
+                  <FlatList
+                    scrollEnabled={false}
+                    data={selectedSubmission.comments}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                      <View style={styles.commentCard}>
+                        <Text style={styles.commentAuthor}>
+                          {item.author_name || "Instructor"}
+                        </Text>
+                        <Text style={styles.commentTime}>
+                          {new Date(item.created_at).toLocaleDateString() +
+                            " " +
+                            new Date(item.created_at).toLocaleTimeString()}
+                        </Text>
+                        <Text style={styles.commentText}>{item.text}</Text>
+                      </View>
+                    )}
+                  />
+                ) : (
+                  <Text
+                    style={{ fontSize: 12, color: "#999", fontStyle: "italic" }}
+                  >
+                    No comments yet
+                  </Text>
+                )}
+
+                {/* Comment Input */}
+                <TextInput
+                  style={styles.commentInput}
+                  placeholder="Add a review comment..."
+                  placeholderTextColor="#666"
+                  multiline
+                  value={comment}
+                  onChangeText={setComment}
+                  editable={!submittingComment}
+                />
+
+                <TouchableOpacity
+                  style={styles.submitCommentButton}
+                  onPress={handleAddComment}
+                  disabled={submittingComment}
+                >
+                  <LinearGradient
+                    colors={["#1a4d7f", "#0d2a4a"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.submitCommentGradient}
+                  >
+                    {submittingComment ? (
+                      <ActivityIndicator color="#fff" size="small" />
+                    ) : (
+                      <>
+                        <MaterialCommunityIcons
+                          name="send"
+                          size={18}
+                          color="#fff"
+                        />
+                        <Text style={styles.submitCommentText}>
+                          Post Comment
+                        </Text>
+                      </>
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ height: 20 }} />
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

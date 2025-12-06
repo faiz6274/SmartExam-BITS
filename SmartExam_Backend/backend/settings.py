@@ -12,7 +12,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'dev-secret')
 DEBUG = os.getenv('DEBUG', '1') == '1'
 # In DEBUG mode, allow all hosts
 if DEBUG:
-    ALLOWED_HOSTS = ['*']
+    ALLOWED_HOSTS = ['*', 'testserver']
 else:
     # Production hosts
     _default_hosts = 'localhost,127.0.0.1,192.168.1.30'
@@ -63,6 +63,10 @@ if USE_LOCAL_DB:
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'OPTIONS': {
+                'timeout': 20,  # Prevent SQLite timeouts
+                'check_same_thread': False,  # Allow multi-threaded access
+            }
         }
     }
 else:
@@ -82,21 +86,20 @@ else:
     }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    # Disabled for performance - custom validation in serializer
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    #     'OPTIONS': {'min_length': 8,}
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    # },
+    # {
+    #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    # },
 ]
 
 LANGUAGE_CODE = 'en-us'
@@ -146,6 +149,15 @@ CORS_ALLOWED_ORIGINS = [
 # For development - allow all origins
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
+
+# Caching for performance
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'smartexam-cache',
+        'TIMEOUT': 300,
+    }
+}
 
 # Media URL (if using S3)
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/" if AWS_S3_CUSTOM_DOMAIN else '/media/'

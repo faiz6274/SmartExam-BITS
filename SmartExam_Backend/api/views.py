@@ -25,25 +25,28 @@ def get_role(user):
 
 
 class RegisterView(APIView):
-    """Register a new user."""
+    """Register a new user - optimized for speed."""
     permission_classes = [permissions.AllowAny]
     
     def post(self, request):
         try:
-            logger.debug(f"Register request received")
-            logger.debug(f"Request data: {request.data}")
-            logger.debug(f"Content-Type: {request.META.get('CONTENT_TYPE')}")
-            logger.debug(f"Body: {request.body}")
-            
+            # Validate and create user directly (minimize operations)
             serializer = UserSerializer(data=request.data)
             if serializer.is_valid():
                 user = serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            logger.warning(f"Serializer errors: {serializer.errors}")
+                # Return minimal data immediately (faster response)
+                return Response(
+                    {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'role': user.role,
+                    },
+                    status=status.HTTP_201_CREATED
+                )
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Register error: {str(e)}")
-            logger.error(traceback.format_exc())
             return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
