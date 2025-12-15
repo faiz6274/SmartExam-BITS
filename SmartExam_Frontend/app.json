@@ -4,16 +4,19 @@
     "slug": "smartexam",
     "version": "1.0.0",
     "orientation": "portrait",
+    "cli": {
+      "appVersionSource": "local"
+    },
     "userInterfaceStyle": "dark",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "platforms": [
-      "android",
-      "web"
-    ],
+    "assetBundlePatterns": ["**/*"],
+    "platforms": ["android", "web"],
     "android": {
       "package": "com.smartexam.app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c2320661-438e-4158-995a-f7a29614e78e"
+      }
     }
   }
 }
