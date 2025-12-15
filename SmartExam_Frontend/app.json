@@ -5,7 +5,15 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "assetBundlePatterns": ["**/*"],
-    "platforms": ["android", "web"]
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "platforms": [
+      "android",
+      "web"
+    ],
+    "android": {
+      "package": "com.smartexam.app"
+    }
   }
 }
