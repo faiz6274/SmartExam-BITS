@@ -1,0 +1,16 @@
+[Unit]
+Description=gunicorn daemon for SmartExam
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/SmartExam-BITS/SmartExam_Backend
+Environment="PATH=/home/ubuntu/SmartExam-BITS/SmartExam_Backend/venv/bin"
+ExecStart=/home/ubuntu/SmartExam-BITS/SmartExam_Backend/venv/bin/gunicorn backend.wsgi:application \
+    --name smartexam-gunicorn \
+    --workers 3 \
+    --bind unix:/run/smartexam.sock
+
+[Install]
+WantedBy=multi-user.target

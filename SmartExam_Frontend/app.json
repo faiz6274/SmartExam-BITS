@@ -15,5 +15,9 @@
     "android": {
       "package": "com.smartexam.app"
     }
+    ,
+    "extra": {
+      "API_BASE": "https://your-backend-domain.com/api/"
+    }
   }
 }
