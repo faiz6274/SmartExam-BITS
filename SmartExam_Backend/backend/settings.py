@@ -191,10 +191,10 @@ SIMPLE_JWT = {
 # ------------------------------------------------------------
 # CORS
 # ------------------------------------------------------------
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    # EC2 HTTP only (no domain/https)
+# Allow overriding via environment variable; default to DEBUG behavior.
+CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", str(DEBUG)).lower() in ("1", "true", "yes")
+if not CORS_ALLOW_ALL_ORIGINS:
+    # EC2 HTTP only (no domain/https) - include current known origin by default
     default_cors = "http://13.200.180.132"
     CORS_ALLOWED_ORIGINS = [
         o.strip() for o in os.getenv("CORS_ALLOWED_ORIGINS", default_cors).split(",") if o.strip()
@@ -211,10 +211,11 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_CREDENTIALS = False  # set True only if you use cookies
 
 # ------------------------------------------------------------
-# Security (HTTP-only as requested; no secure cookies)
+# Security
 # ------------------------------------------------------------
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+# Enable secure cookies when running behind HTTPS in production
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "0").lower() in ("1", "true", "yes")
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "0").lower() in ("1", "true", "yes")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # harmless even on HTTP
 
 # ------------------------------------------------------------
