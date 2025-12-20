@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -212,15 +212,87 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#64c8ff",
   },
+  examSelector: {
+    backgroundColor: "rgba(100, 200, 255, 0.08)",
+    borderWidth: 1.5,
+    borderColor: "rgba(100, 200, 255, 0.3)",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 20,
+  },
+  examSelectorLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#64c8ff",
+    marginBottom: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  examList: {
+    maxHeight: 120,
+  },
+  examOption: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+    borderRadius: 8,
+    backgroundColor: "rgba(100, 200, 255, 0.1)",
+    borderWidth: 1.5,
+    borderColor: "rgba(100, 200, 255, 0.2)",
+  },
+  examOptionSelected: {
+    backgroundColor: "rgba(100, 200, 255, 0.25)",
+    borderColor: "#64c8ff",
+  },
+  examOptionText: {
+    color: "#bbb",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  examOptionTextSelected: {
+    color: "#64c8ff",
+  },
+  examOptionDuration: {
+    color: "#999",
+    fontSize: 11,
+    marginTop: 4,
+  },
 });
 
 export default function ScannerScreen({ route, navigation }) {
-  const { examId } = route.params || { examId: 1 };
+  const { examId: passedExamId } = route.params || { examId: null };
+  const [exams, setExams] = useState([]);
+  const [selectedExamId, setSelectedExamId] = useState(passedExamId || null);
+  const [loadingExams, setLoadingExams] = useState(true);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [compressionQuality, setCompressionQuality] = useState(0.75);
   const [compressionStats, setCompressionStats] = useState({});
   const scrollViewRef = useRef(null);
+
+  // Fetch available exams on mount
+  useEffect(() => {
+    fetchExams();
+  }, []);
+
+  const fetchExams = async () => {
+    try {
+      setLoadingExams(true);
+      const response = await api.get("exams/");
+      const publishedExams = response.data.filter((exam) => exam.is_published);
+      setExams(publishedExams);
+
+      // If no exam was passed and there are exams, select the first one
+      if (!passedExamId && publishedExams.length > 0) {
+        setSelectedExamId(publishedExams[0].id);
+      }
+    } catch (error) {
+      console.error("Error fetching exams:", error);
+      Alert.alert("Error", "Failed to load exams");
+    } finally {
+      setLoadingExams(false);
+    }
+  };
 
   const pickImage = async () => {
     try {
@@ -313,6 +385,11 @@ export default function ScannerScreen({ route, navigation }) {
   };
 
   const handleSubmit = async () => {
+    if (!selectedExamId) {
+      Alert.alert("Error", "Please select an exam before submitting.");
+      return;
+    }
+
     if (images.length === 0) {
       Alert.alert(
         "No Documents",
@@ -369,7 +446,7 @@ export default function ScannerScreen({ route, navigation }) {
       // Add metadata
       formData.append("page_count", images.length);
       // include exam id so backend can associate submission
-      formData.append("exam", String(examId));
+      formData.append("exam", String(selectedExamId));
       formData.append("submitted_at", new Date().toISOString());
       formData.append("compression_quality", compressionQuality);
 
@@ -417,6 +494,55 @@ export default function ScannerScreen({ route, navigation }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Exam Selection Section */}
+        {loadingExams ? (
+          <View style={styles.examSelector}>
+            <Text style={styles.examSelectorLabel}>Loading exams...</Text>
+            <ActivityIndicator color="#64c8ff" size="small" />
+          </View>
+        ) : exams.length === 0 ? (
+          <View style={styles.examSelector}>
+            <Text style={styles.examSelectorLabel}>⚠️ No Exams Available</Text>
+            <Text style={{ color: "#999", fontSize: 12, marginTop: 8 }}>
+              Your instructor hasn't created any exams yet.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.examSelector}>
+            <Text style={styles.examSelectorLabel}>📋 Select Exam</Text>
+            <ScrollView
+              style={styles.examList}
+              scrollEnabled={exams.length > 3}
+              showsVerticalScrollIndicator={false}
+            >
+              {exams.map((exam) => (
+                <TouchableOpacity
+                  key={exam.id}
+                  style={[
+                    styles.examOption,
+                    selectedExamId === exam.id && styles.examOptionSelected,
+                  ]}
+                  onPress={() => setSelectedExamId(exam.id)}
+                >
+                  <Text
+                    style={[
+                      styles.examOptionText,
+                      selectedExamId === exam.id &&
+                        styles.examOptionTextSelected,
+                    ]}
+                  >
+                    {exam.title}
+                  </Text>
+                  <Text style={styles.examOptionDuration}>
+                    ⏱️ {exam.duration_minutes} min | ✅{" "}
+                    {(exam.passing_score * 100).toFixed(0)}%
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
         {/* Capture Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📸 Capture</Text>

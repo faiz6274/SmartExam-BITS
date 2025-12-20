@@ -1,4 +1,3 @@
-
 from rest_framework import generics, permissions
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
@@ -7,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.http import JsonResponse
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ExamSerializer
 from rest_framework import generics
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import SubmissionSerializer
@@ -55,7 +54,7 @@ class SubmissionCreateView(generics.CreateAPIView):
         try:
             exam = Exam.objects.get(pk=int(exam_id))
         except Exam.DoesNotExist:
-            return JsonResponse({'detail': 'Exam not found'}, status=404)
+            return JsonResponse({'detail': 'Exam not found'}, status=404)  # ← This is the 404!
 
         # prevent duplicate submission if unique_together enforced
         if Submission.objects.filter(exam=exam, student=user).exists():
@@ -78,3 +77,42 @@ class SubmissionCreateView(generics.CreateAPIView):
 
         serialized = SubmissionSerializer(submission, context={'request': request})
         return JsonResponse(serialized.data, status=201, safe=False)
+
+
+class ExamListView(generics.ListAPIView):
+    """List all published exams for students to view"""
+    queryset = Exam.objects.filter(is_published=True)
+    serializer_class = ExamSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class ExamCreateView(APIView):
+    """Create a new exam (instructor only)"""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        # Check if user is an instructor
+        if getattr(user, 'role', None) != 'instructor':
+            return JsonResponse({'detail': 'Only instructors can create exams'}, status=403)
+
+        title = request.data.get('title')
+        description = request.data.get('description', '')
+        duration_minutes = int(request.data.get('duration_minutes', 60))
+        passing_score = float(request.data.get('passing_score', 0.6))
+
+        if not title:
+            return JsonResponse({'detail': 'Title is required'}, status=400)
+
+        exam = Exam.objects.create(
+            title=title,
+            description=description,
+            duration_minutes=duration_minutes,
+            passing_score=passing_score,
+            instructor=user,
+            is_published=True
+        )
+
+        serializer = ExamSerializer(exam)
+        return JsonResponse(serializer.data, status=201)

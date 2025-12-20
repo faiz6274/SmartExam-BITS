@@ -5,31 +5,15 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "platforms": [
-      "android",
-      "web"
-    ],
+    "assetBundlePatterns": ["**/*"],
+    "platforms": ["android", "web"],
     "android": {
       "package": "com.smartexam.app"
     },
     "extra": {
-<<<<<<< HEAD
-<<<<<<< HEAD
-      "eas": {
-        "projectId": "c2320661-438e-4158-995a-f7a29614e78e"
-=======
-      "API_BASE": "http://13.200.180.132/api/",
+      "API_BASE": "http://ec2-13-200-180-132.ap-south-1.compute.amazonaws.com:8000/api/",
       "eas": {
         "projectId": "046f778e-5add-4038-a380-92454dc296cd"
->>>>>>> a0841998d0616a339ae50282dc2272a6d2ee8d41
-=======
-      "API_BASE": "http://13.200.180.132/api/",
-      "eas": {
-        "projectId": "046f778e-5add-4038-a380-92454dc296cd"
->>>>>>> cf93c93aba6d109f2bf954e7775a1187c480a8a3
       }
     }
   }

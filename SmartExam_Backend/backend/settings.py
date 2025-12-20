@@ -185,8 +185,8 @@ SIMPLE_JWT = {
 # Allow overriding via environment variable; default to DEBUG behavior.
 CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", str(DEBUG)).lower() in ("1", "true", "yes")
 if not CORS_ALLOW_ALL_ORIGINS:
-    # EC2 HTTP only (no domain/https) - include current known origin by default
-    default_cors = "http://13.200.180.132"
+    # EC2 HTTP only (no domain/https) - include current known origins by default
+    default_cors = "http://13.200.180.132,http://ec2-13-200-180-132.ap-south-1.compute.amazonaws.com,http://localhost:3000,http://localhost:19001"
     CORS_ALLOWED_ORIGINS = [
         o.strip() for o in os.getenv("CORS_ALLOWED_ORIGINS", default_cors).split(",") if o.strip()
     ]

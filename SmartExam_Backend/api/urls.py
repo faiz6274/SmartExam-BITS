@@ -1,6 +1,6 @@
 
 from django.urls import path
-from .views import HealthCheck, RegisterView, ProfileView
+from .views import HealthCheck, RegisterView, ProfileView, ExamListView, ExamCreateView
 from .token_views import MyTokenObtainPairView
 from .views import SubmissionCreateView
 
@@ -13,4 +13,7 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile'),
     # Submissions endpoint for uploading scanned documents
     path('submissions/', SubmissionCreateView.as_view(), name='submissions'),
+    # Exam endpoints
+    path('exams/', ExamListView.as_view(), name='exams'),
+    path('exams/create/', ExamCreateView.as_view(), name='exam-create'),
 ]

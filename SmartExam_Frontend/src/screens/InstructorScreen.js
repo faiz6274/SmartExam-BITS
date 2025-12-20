@@ -56,6 +56,31 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
+  tabContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: "rgba(100, 200, 255, 0.1)",
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    borderBottomWidth: 3,
+    borderBottomColor: "transparent",
+  },
+  activeTab: {
+    borderBottomColor: "#64c8ff",
+  },
+  tabText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#999",
+  },
+  activeTabText: {
+    color: "#64c8ff",
+  },
   submissionCard: {
     backgroundColor: "rgba(100, 200, 255, 0.08)",
     borderWidth: 1,
@@ -114,6 +139,43 @@ const styles = StyleSheet.create({
     color: "#64c8ff",
     fontSize: 12,
     fontWeight: "600",
+  },
+  createButton: {
+    borderRadius: 12,
+    overflow: "hidden",
+    marginBottom: 20,
+  },
+  createButtonGradient: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  createButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  examCard: {
+    backgroundColor: "rgba(124, 255, 124, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(124, 255, 124, 0.3)",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  examTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#7cff7c",
+    marginBottom: 8,
+  },
+  examInfo: {
+    fontSize: 12,
+    color: "#bbb",
+    marginBottom: 6,
   },
   modal: {
     flex: 1,
@@ -240,62 +302,147 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  tabButtons: {
-    flexDirection: "row",
+  formGroup: {
     marginBottom: 16,
-    gap: 8,
   },
-  tabButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+  formLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#64c8ff",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  textInput: {
+    backgroundColor: "rgba(100, 200, 255, 0.1)",
     borderWidth: 1,
     borderColor: "rgba(100, 200, 255, 0.3)",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: "#fff",
+    fontSize: 13,
+    marginBottom: 12,
   },
-  tabButtonActive: {
-    backgroundColor: "rgba(100, 200, 255, 0.2)",
-    borderColor: "#64c8ff",
+  numberInput: {
+    backgroundColor: "rgba(100, 200, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(100, 200, 255, 0.3)",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: "#fff",
+    fontSize: 13,
   },
-  tabButtonText: {
-    fontSize: 12,
-    color: "#999",
-    fontWeight: "600",
+  createExamButton: {
+    height: 48,
+    borderRadius: 12,
+    overflow: "hidden",
+    marginTop: 12,
   },
-  tabButtonTextActive: {
-    color: "#64c8ff",
+  createExamGradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  createExamText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
+    marginLeft: 8,
   },
 });
 
 export default function InstructorScreen({ navigation }) {
+  const [activeTab, setActiveTab] = useState("submissions"); // 'submissions' or 'exams'
   const [submissions, setSubmissions] = useState([]);
+  const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [currentFile, setCurrentFile] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [comment, setComment] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
-  const [view, setView] = useState("submissions"); // "submissions" or "exams"
+  const [showCreateExamModal, setShowCreateExamModal] = useState(false);
+  const [creatingExam, setCreatingExam] = useState(false);
+  const [newExam, setNewExam] = useState({
+    title: "",
+    description: "",
+    duration_minutes: "60",
+    passing_score: "0.6",
+  });
 
   const fetchSubmissions = async () => {
-    setLoading(true);
     try {
       const res = await api.get("submissions/");
       setSubmissions(res.data);
     } catch (e) {
       console.error("Error fetching submissions:", e);
-      Alert.alert("Error", "Failed to fetch submissions");
+    }
+  };
+
+  const fetchExams = async () => {
+    try {
+      const res = await api.get("exams/");
+      setExams(res.data);
+    } catch (e) {
+      console.error("Error fetching exams:", e);
+    }
+  };
+
+  const loadInitialData = async () => {
+    setLoading(true);
+    try {
+      await Promise.all([fetchSubmissions(), fetchExams()]);
     } finally {
       setLoading(false);
     }
   };
 
-  const refreshSubmissions = async () => {
-    await fetchSubmissions();
+  const refreshData = async () => {
+    if (activeTab === "submissions") {
+      await fetchSubmissions();
+    } else {
+      await fetchExams();
+    }
   };
 
   useEffect(() => {
-    fetchSubmissions();
+    loadInitialData();
   }, []);
+
+  const handleCreateExam = async () => {
+    if (!newExam.title.trim()) {
+      Alert.alert("Error", "Please enter exam title");
+      return;
+    }
+
+    setCreatingExam(true);
+    try {
+      await api.post("exams/create/", {
+        title: newExam.title,
+        description: newExam.description,
+        duration_minutes: parseInt(newExam.duration_minutes),
+        passing_score: parseFloat(newExam.passing_score),
+      });
+
+      Alert.alert("Success", "Exam created successfully!");
+      setNewExam({
+        title: "",
+        description: "",
+        duration_minutes: "60",
+        passing_score: "0.6",
+      });
+      setShowCreateExamModal(false);
+      await fetchExams();
+    } catch (e) {
+      console.error("Error creating exam:", e);
+      Alert.alert("Error", e.response?.data?.detail || "Failed to create exam");
+    } finally {
+      setCreatingExam(false);
+    }
+  };
 
   const handleViewSubmission = (submission) => {
     setSelectedSubmission(submission);
@@ -336,7 +483,7 @@ export default function InstructorScreen({ navigation }) {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Instructor Panel</Text>
-          <Text style={styles.subtitle}>Review student submissions</Text>
+          <Text style={styles.subtitle}>Manage exams and submissions</Text>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#64c8ff" />
@@ -349,110 +496,214 @@ export default function InstructorScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Instructor Panel</Text>
-        <Text style={styles.subtitle}>Review student submissions</Text>
+        <Text style={styles.subtitle}>Manage exams and submissions</Text>
+      </View>
+
+      {/* Tabs */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "submissions" && styles.activeTab]}
+          onPress={() => {
+            setActiveTab("submissions");
+            fetchSubmissions();
+          }}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "submissions" && styles.activeTabText,
+            ]}
+          >
+            📋 Submissions
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tab, activeTab === "exams" && styles.activeTab]}
+          onPress={() => {
+            setActiveTab("exams");
+            fetchExams();
+          }}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "exams" && styles.activeTabText,
+            ]}
+          >
+            📝 Exams
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        onMomentumScrollEnd={refreshSubmissions}
+        onMomentumScrollEnd={refreshData}
       >
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            📋 Student Submissions ({submissions.length})
-          </Text>
+        {activeTab === "submissions" ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              📋 Student Submissions ({submissions.length})
+            </Text>
 
-          {submissions.length === 0 ? (
-            <View style={styles.emptyState}>
-              <View style={styles.emptyIcon}>
-                <MaterialCommunityIcons
-                  name="folder-open"
-                  size={48}
-                  color="#666"
-                />
+            {submissions.length === 0 ? (
+              <View style={styles.emptyState}>
+                <View style={styles.emptyIcon}>
+                  <MaterialCommunityIcons
+                    name="folder-open"
+                    size={48}
+                    color="#666"
+                  />
+                </View>
+                <Text style={styles.emptyText}>No submissions yet</Text>
               </View>
-              <Text style={styles.emptyText}>No submissions yet</Text>
-            </View>
-          ) : (
-            <FlatList
-              scrollEnabled={false}
-              data={submissions}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.submissionCard}>
-                  <View style={styles.submissionHeader}>
-                    <Text style={styles.studentName}>
-                      {item.student_name || `Student #${item.student}`}
-                    </Text>
-                    <View style={styles.statusBadge}>
-                      <Text style={styles.statusText}>{item.status}</Text>
-                    </View>
-                  </View>
-
-                  <Text style={styles.submissionInfo}>
-                    📄 {item.page_count || 0} pages
-                  </Text>
-                  <Text style={styles.submissionInfo}>
-                    🕒{" "}
-                    {item.submitted_at
-                      ? new Date(item.submitted_at).toLocaleDateString() +
-                        " " +
-                        new Date(item.submitted_at).toLocaleTimeString()
-                      : "Not submitted"}
-                  </Text>
-
-                  {item.files && item.files.length > 0 && (
-                    <Text style={styles.fileCount}>
-                      📎 {item.files.length} file(s) attached
-                    </Text>
-                  )}
-
-                  <View style={{ flexDirection: "row" }}>
-                    <TouchableOpacity
-                      style={styles.button}
-                      onPress={() => handleViewSubmission(item)}
-                    >
-                      <MaterialCommunityIcons
-                        name="eye"
-                        size={14}
-                        color="#64c8ff"
-                      />
-                      <Text style={[styles.buttonText, { marginLeft: 4 }]}>
-                        Review
+            ) : (
+              <FlatList
+                scrollEnabled={false}
+                data={submissions}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <View style={styles.submissionCard}>
+                    <View style={styles.submissionHeader}>
+                      <Text style={styles.studentName}>
+                        {item.student_name || `Student #${item.student}`}
                       </Text>
-                    </TouchableOpacity>
+                      <View style={styles.statusBadge}>
+                        <Text style={styles.statusText}>{item.status}</Text>
+                      </View>
+                    </View>
 
-                    {item.comments && item.comments.length > 0 && (
+                    <Text style={styles.submissionInfo}>
+                      📄 {item.page_count || 0} pages
+                    </Text>
+                    <Text style={styles.submissionInfo}>
+                      🕒{" "}
+                      {item.submitted_at
+                        ? new Date(item.submitted_at).toLocaleDateString() +
+                          " " +
+                          new Date(item.submitted_at).toLocaleTimeString()
+                        : "Not submitted"}
+                    </Text>
+
+                    {item.files && item.files.length > 0 && (
+                      <Text style={styles.fileCount}>
+                        📎 {item.files.length} file(s) attached
+                      </Text>
+                    )}
+
+                    <View style={{ flexDirection: "row" }}>
                       <TouchableOpacity
-                        style={[
-                          styles.button,
-                          {
-                            borderColor: "#7cff7c",
-                            backgroundColor: "rgba(124, 255, 124, 0.1)",
-                          },
-                        ]}
+                        style={styles.button}
+                        onPress={() => handleViewSubmission(item)}
                       >
                         <MaterialCommunityIcons
-                          name="comment-multiple"
+                          name="eye"
                           size={14}
-                          color="#7cff7c"
+                          color="#64c8ff"
                         />
-                        <Text
-                          style={[
-                            styles.buttonText,
-                            { color: "#7cff7c", marginLeft: 4 },
-                          ]}
-                        >
-                          {item.comments.length}
+                        <Text style={[styles.buttonText, { marginLeft: 4 }]}>
+                          Review
                         </Text>
                       </TouchableOpacity>
-                    )}
+
+                      {item.comments && item.comments.length > 0 && (
+                        <TouchableOpacity
+                          style={[
+                            styles.button,
+                            {
+                              borderColor: "#7cff7c",
+                              backgroundColor: "rgba(124, 255, 124, 0.1)",
+                            },
+                          ]}
+                        >
+                          <MaterialCommunityIcons
+                            name="comment-multiple"
+                            size={14}
+                            color="#7cff7c"
+                          />
+                          <Text
+                            style={[
+                              styles.buttonText,
+                              { color: "#7cff7c", marginLeft: 4 },
+                            ]}
+                          >
+                            {item.comments.length}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   </View>
+                )}
+              />
+            )}
+          </View>
+        ) : (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              📝 Published Exams ({exams.length})
+            </Text>
+
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={() => setShowCreateExamModal(true)}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={["#1a4d7f", "#0d2a4a"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.createButtonGradient}
+              >
+                <MaterialCommunityIcons
+                  name="plus-circle"
+                  size={20}
+                  color="#64c8ff"
+                />
+                <Text style={styles.createButtonText}>Create New Exam</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {exams.length === 0 ? (
+              <View style={styles.emptyState}>
+                <View style={styles.emptyIcon}>
+                  <MaterialCommunityIcons
+                    name="pencil-outline"
+                    size={48}
+                    color="#666"
+                  />
                 </View>
-              )}
-            />
-          )}
-        </View>
+                <Text style={styles.emptyText}>
+                  No exams created yet.{"\n"}
+                  Create an exam for your students
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                scrollEnabled={false}
+                data={exams}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <View style={styles.examCard}>
+                    <Text style={styles.examTitle}>{item.title}</Text>
+                    <Text style={styles.examInfo}>
+                      📝 {item.description || "No description"}
+                    </Text>
+                    <Text style={styles.examInfo}>
+                      ⏱️ Duration: {item.duration_minutes} minutes
+                    </Text>
+                    <Text style={styles.examInfo}>
+                      ✅ Passing Score: {(item.passing_score * 100).toFixed(0)}%
+                    </Text>
+                    <Text style={styles.examInfo}>
+                      📊 Status: {item.is_published ? "Published" : "Draft"}
+                    </Text>
+                  </View>
+                )}
+              />
+            )}
+          </View>
+        )}
       </ScrollView>
 
       {/* Submission Review Modal */}
@@ -469,14 +720,9 @@ export default function InstructorScreen({ navigation }) {
         <View style={styles.modal}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.modalTitle}>
-                  {selectedSubmission?.student_name || "Student"}
-                </Text>
-                <Text style={{ fontSize: 11, color: "#999", marginTop: 2 }}>
-                  {selectedSubmission?.page_count || 0} pages submitted
-                </Text>
-              </View>
+              <Text style={styles.modalTitle}>
+                {selectedSubmission?.student_name || "Submission"}
+              </Text>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => {
@@ -489,133 +735,281 @@ export default function InstructorScreen({ navigation }) {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={{ paddingHorizontal: 20 }}>
-              {/* File Navigation */}
-              {selectedSubmission?.files &&
-                selectedSubmission.files.length > 0 && (
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>📁 Files</Text>
-                    <ScrollView
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                      style={{ marginBottom: 16 }}
-                    >
-                      {selectedSubmission.files.map((file, idx) => (
-                        <TouchableOpacity
-                          key={file.id}
-                          style={[
-                            styles.button,
-                            {
-                              marginRight: 8,
-                              backgroundColor:
-                                currentFile?.id === file.id
-                                  ? "rgba(100, 200, 255, 0.2)"
-                                  : "rgba(100, 200, 255, 0.08)",
-                              borderColor:
-                                currentFile?.id === file.id
-                                  ? "#64c8ff"
-                                  : "rgba(100, 200, 255, 0.2)",
-                            },
-                          ]}
-                          onPress={() => setCurrentFile(file)}
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={{ padding: 20 }}
+              showsVerticalScrollIndicator={false}
+            >
+              {selectedSubmission && (
+                <>
+                  {/* File Pages */}
+                  {selectedSubmission.files &&
+                    selectedSubmission.files.length > 0 && (
+                      <View>
+                        <ScrollView
+                          horizontal={true}
+                          showsHorizontalScrollIndicator={false}
+                          style={{ marginBottom: 16 }}
                         >
-                          <Text style={styles.buttonText}>Page {idx + 1}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </ScrollView>
+                          {selectedSubmission.files.map((file, idx) => (
+                            <TouchableOpacity
+                              key={file.id}
+                              style={[
+                                styles.button,
+                                {
+                                  marginRight: 8,
+                                  backgroundColor:
+                                    currentFile?.id === file.id
+                                      ? "rgba(100, 200, 255, 0.2)"
+                                      : "rgba(100, 200, 255, 0.08)",
+                                  borderColor:
+                                    currentFile?.id === file.id
+                                      ? "#64c8ff"
+                                      : "rgba(100, 200, 255, 0.2)",
+                                },
+                              ]}
+                              onPress={() => setCurrentFile(file)}
+                            >
+                              <Text style={styles.buttonText}>
+                                Page {idx + 1}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
 
-                    {currentFile && (
-                      <>
-                        <Text style={styles.fileName}>
-                          📄{" "}
-                          {currentFile.file?.split("/").pop() ||
-                            "Submitted file"}
-                        </Text>
-                        {currentFile.file && (
-                          <Image
-                            source={{ uri: currentFile.file }}
-                            style={styles.filePreview}
-                            resizeMode="contain"
-                          />
+                        {currentFile && (
+                          <>
+                            <Text style={styles.fileName}>
+                              📄{" "}
+                              {currentFile.file?.split("/").pop() ||
+                                "Submitted file"}
+                            </Text>
+                            {currentFile.file && (
+                              <Image
+                                source={{ uri: currentFile.file }}
+                                style={styles.filePreview}
+                                resizeMode="contain"
+                              />
+                            )}
+                          </>
                         )}
-                      </>
-                    )}
-                  </View>
-                )}
-
-              {/* Comments Section */}
-              <View style={styles.commentsSection}>
-                <Text style={styles.commentsTitle}>
-                  💬 Comments ({selectedSubmission?.comments?.length || 0})
-                </Text>
-
-                {selectedSubmission?.comments &&
-                selectedSubmission.comments.length > 0 ? (
-                  <FlatList
-                    scrollEnabled={false}
-                    data={selectedSubmission.comments}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                      <View style={styles.commentCard}>
-                        <Text style={styles.commentAuthor}>
-                          {item.author_name || "Instructor"}
-                        </Text>
-                        <Text style={styles.commentTime}>
-                          {new Date(item.created_at).toLocaleDateString() +
-                            " " +
-                            new Date(item.created_at).toLocaleTimeString()}
-                        </Text>
-                        <Text style={styles.commentText}>{item.text}</Text>
                       </View>
                     )}
-                  />
-                ) : (
-                  <Text
-                    style={{ fontSize: 12, color: "#999", fontStyle: "italic" }}
-                  >
-                    No comments yet
-                  </Text>
-                )}
 
-                {/* Comment Input */}
+                  {/* Comments Section */}
+                  <View style={styles.commentsSection}>
+                    <Text style={styles.commentsTitle}>
+                      💬 Comments ({selectedSubmission?.comments?.length || 0})
+                    </Text>
+
+                    {selectedSubmission?.comments &&
+                    selectedSubmission.comments.length > 0 ? (
+                      <FlatList
+                        scrollEnabled={false}
+                        data={selectedSubmission.comments}
+                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={({ item }) => (
+                          <View style={styles.commentCard}>
+                            <Text style={styles.commentAuthor}>
+                              {item.author_name || "Instructor"}
+                            </Text>
+                            <Text style={styles.commentTime}>
+                              {new Date(item.created_at).toLocaleDateString() +
+                                " " +
+                                new Date(item.created_at).toLocaleTimeString()}
+                            </Text>
+                            <Text style={styles.commentText}>{item.text}</Text>
+                          </View>
+                        )}
+                      />
+                    ) : (
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          color: "#999",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        No comments yet
+                      </Text>
+                    )}
+
+                    {/* Comment Input */}
+                    <TextInput
+                      style={styles.commentInput}
+                      placeholder="Add a review comment..."
+                      placeholderTextColor="#666"
+                      multiline
+                      value={comment}
+                      onChangeText={setComment}
+                      editable={!submittingComment}
+                    />
+
+                    <TouchableOpacity
+                      style={styles.submitCommentButton}
+                      onPress={handleAddComment}
+                      disabled={submittingComment}
+                    >
+                      <LinearGradient
+                        colors={["#1a4d7f", "#0d2a4a"]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.submitCommentGradient}
+                      >
+                        {submittingComment ? (
+                          <ActivityIndicator color="#fff" size="small" />
+                        ) : (
+                          <>
+                            <MaterialCommunityIcons
+                              name="send"
+                              size={18}
+                              color="#fff"
+                            />
+                            <Text style={styles.submitCommentText}>
+                              Post Comment
+                            </Text>
+                          </>
+                        )}
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{ height: 20 }} />
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Create Exam Modal */}
+      <Modal
+        visible={showCreateExamModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => {
+          setShowCreateExamModal(false);
+          setNewExam({
+            title: "",
+            description: "",
+            duration_minutes: "60",
+            passing_score: "0.6",
+          });
+        }}
+      >
+        <View style={styles.modal}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Create New Exam</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => {
+                  setShowCreateExamModal(false);
+                  setNewExam({
+                    title: "",
+                    description: "",
+                    duration_minutes: "60",
+                    passing_score: "0.6",
+                  });
+                }}
+              >
+                <MaterialCommunityIcons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={{ padding: 20 }}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Exam Title</Text>
                 <TextInput
-                  style={styles.commentInput}
-                  placeholder="Add a review comment..."
+                  style={styles.textInput}
+                  placeholder="e.g., Midterm Exam"
+                  placeholderTextColor="#666"
+                  value={newExam.title}
+                  onChangeText={(val) => setNewExam({ ...newExam, title: val })}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Description</Text>
+                <TextInput
+                  style={[styles.textInput, { minHeight: 80 }]}
+                  placeholder="Exam description (optional)"
                   placeholderTextColor="#666"
                   multiline
-                  value={comment}
-                  onChangeText={setComment}
-                  editable={!submittingComment}
+                  value={newExam.description}
+                  onChangeText={(val) =>
+                    setNewExam({ ...newExam, description: val })
+                  }
                 />
-
-                <TouchableOpacity
-                  style={styles.submitCommentButton}
-                  onPress={handleAddComment}
-                  disabled={submittingComment}
-                >
-                  <LinearGradient
-                    colors={["#1a4d7f", "#0d2a4a"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.submitCommentGradient}
-                  >
-                    {submittingComment ? (
-                      <ActivityIndicator color="#fff" size="small" />
-                    ) : (
-                      <>
-                        <MaterialCommunityIcons
-                          name="send"
-                          size={18}
-                          color="#fff"
-                        />
-                        <Text style={styles.submitCommentText}>
-                          Post Comment
-                        </Text>
-                      </>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
               </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Duration (minutes)</Text>
+                <TextInput
+                  style={styles.numberInput}
+                  placeholder="60"
+                  placeholderTextColor="#666"
+                  keyboardType="numeric"
+                  value={newExam.duration_minutes}
+                  onChangeText={(val) =>
+                    setNewExam({ ...newExam, duration_minutes: val })
+                  }
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Passing Score (0-1)</Text>
+                <TextInput
+                  style={styles.numberInput}
+                  placeholder="0.6"
+                  placeholderTextColor="#666"
+                  keyboardType="decimal-pad"
+                  value={newExam.passing_score}
+                  onChangeText={(val) =>
+                    setNewExam({ ...newExam, passing_score: val })
+                  }
+                />
+                <Text
+                  style={{
+                    fontSize: 10,
+                    color: "#999",
+                    marginTop: 6,
+                  }}
+                >
+                  Enter as decimal (e.g., 0.6 = 60%, 0.7 = 70%)
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={styles.createExamButton}
+                onPress={handleCreateExam}
+                disabled={creatingExam}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={["#c94f2e", "#8b3820"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.createExamGradient}
+                >
+                  {creatingExam ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <>
+                      <MaterialCommunityIcons
+                        name="check-circle"
+                        size={20}
+                        color="#fff"
+                      />
+                      <Text style={styles.createExamText}>Create Exam</Text>
+                    </>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
 
               <View style={{ height: 20 }} />
             </ScrollView>

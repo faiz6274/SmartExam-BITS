@@ -96,6 +96,15 @@ class SubmissionSerializer(serializers.ModelSerializer):
         return CommentSerializer(comments, many=True).data
 
 
+class ExamSerializer(serializers.ModelSerializer):
+    instructor_name = serializers.CharField(source='instructor.username', read_only=True)
+    
+    class Meta:
+        model = Exam
+        fields = ['id', 'title', 'description', 'instructor', 'instructor_name', 'created_at', 'duration_minutes', 'passing_score', 'is_published']
+        read_only_fields = ['id', 'created_at', 'instructor']
+
+
 class CommentSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source='author.username', read_only=True)
     
