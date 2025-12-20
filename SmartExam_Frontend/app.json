@@ -14,10 +14,12 @@
     ],
     "android": {
       "package": "com.smartexam.app"
-    }
-    ,
+    },
     "extra": {
-      "API_BASE": "https://your-backend-domain.com/api/"
+      "API_BASE": "http://13.200.180.132/api/",
+      "eas": {
+        "projectId": "046f778e-5add-4038-a380-92454dc296cd"
+      }
     }
   }
 }

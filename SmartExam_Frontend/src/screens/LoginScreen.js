@@ -160,9 +160,30 @@ export default function LoginScreen({ navigation }) {
       if (res.data.role) {
         await AsyncStorage.setItem("userRole", res.data.role);
       }
-      if (res.data.username) {
-        await AsyncStorage.setItem("userName", res.data.username);
+      // Ensure we always store a username to avoid showing a stale name
+      const storedName = res.data.username || username;
+      if (storedName) {
+        await AsyncStorage.setItem("userName", storedName);
       }
+
+      // Try to fetch full profile after obtaining tokens. This ensures we
+      // have an authoritative `userRole` from the backend even if the
+      // login response did not include it.
+      try {
+        const profile = await api.get("profile/");
+        if (profile?.data?.role) {
+          await AsyncStorage.setItem("userRole", profile.data.role);
+        }
+        if (profile?.data?.username) {
+          await AsyncStorage.setItem("userName", profile.data.username);
+        }
+      } catch (e) {
+        // Non-fatal: if profile fetch fails it's probably because the
+        // backend doesn't expose /api/profile/. We already saved fallback
+        // values above so continue.
+        console.warn("Profile fetch failed (optional):", e.message || e);
+      }
+
       navigation.replace("Home");
     } catch (e) {
       console.error("Login error:", e.message);
