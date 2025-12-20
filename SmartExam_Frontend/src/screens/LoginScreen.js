@@ -236,11 +236,19 @@ export default function LoginScreen({ navigation }) {
               placeholder="Enter your username"
               placeholderTextColor="#666"
               value={username}
-              onChangeText={setUsername}
+              onChangeText={(text) => {
+                console.log("Username changed:", text);
+                setUsername(text);
+              }}
               style={styles.input}
               editable={!loading}
               onFocus={() => setUsernameFocused(true)}
               onBlur={() => setUsernameFocused(false)}
+              selectTextOnFocus={true}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="default"
+              returnKeyType="next"
             />
           </View>
 
@@ -258,11 +266,18 @@ export default function LoginScreen({ navigation }) {
               placeholderTextColor="#666"
               secureTextEntry={!showPassword}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                console.log("Password changed");
+                setPassword(text);
+              }}
               style={styles.input}
               editable={!loading}
               onFocus={() => setPasswordFocused(true)}
               onBlur={() => setPasswordFocused(false)}
+              selectTextOnFocus={true}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="done"
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
               <MaterialCommunityIcons

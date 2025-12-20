@@ -3,26 +3,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 
-// Determine API base from Expo config `extra.API_BASE` when available.
-// Fallback to local defaults for development when not provided.
-const expoExtra = Constants?.expoConfig?.extra || {};
-console.log("expoExtra:", expoExtra);
-console.log("expoExtra.API_BASE:", expoExtra.API_BASE);
+// AWS Backend URL - PRODUCTION
+const API_BASE =
+  "http://ec2-13-200-180-132.ap-south-1.compute.amazonaws.com:8000/api/";
 
-let API_BASE = expoExtra.API_BASE;
-
-if (!API_BASE) {
-  // Local defaults
-  if (Platform.OS === "android") {
-    API_BASE = "http://10.0.2.2:8000/api/"; // Android emulator -> host machine
-  } else if (Platform.OS === "ios") {
-    API_BASE = "http://localhost:8000/api/";
-  } else {
-    API_BASE = "http://localhost:8000/api/";
-  }
-}
-
-const USE_LOCAL_BACKEND = !expoExtra.API_BASE; // True if using local defaults, false if from expo config
+console.log("[API Configuration - AWS ONLY]");
+console.log(`API Base URL: ${API_BASE}`);
+console.log(`Platform: ${Platform.OS}`);
+console.log("═══════════════════════════════════════");
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -35,13 +23,6 @@ const api = axios.create({
   xsrfCookieName: "", // Disable CSRF cookie
   xsrfHeaderName: "", // Disable CSRF header
 });
-
-console.log("═══════════════════════════════════════");
-console.log("[API Configuration]");
-console.log(`Backend: ${USE_LOCAL_BACKEND ? "LOCAL" : "AWS PRODUCTION"}`);
-console.log(`API Base URL: ${API_BASE}`);
-console.log(`Platform: ${Platform.OS}`);
-console.log("═══════════════════════════════════════");
 
 // Attach access token to every request (except public endpoints)
 api.interceptors.request.use(async (config) => {
