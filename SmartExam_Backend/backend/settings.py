@@ -40,7 +40,6 @@ INSTALLED_APPS = [
 
     # Third-party
     "rest_framework",
-    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "storages",
 
@@ -175,8 +174,9 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("JWT_ACCESS_MINUTES", "30"))),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.getenv("JWT_REFRESH_DAYS", "7"))),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
+    # Blacklist is disabled; do not rotate refresh tokens to avoid table writes
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
 }
 
 # ------------------------------------------------------------

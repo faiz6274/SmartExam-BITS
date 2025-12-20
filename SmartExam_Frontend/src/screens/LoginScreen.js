@@ -233,6 +233,9 @@ export default function LoginScreen({ navigation }) {
           >
             <MaterialCommunityIcons name="account" size={20} color="#64c8ff" />
             <TextInput
+              id="login-username"
+              name="username"
+              autoComplete="username"
               placeholder="Enter your username"
               placeholderTextColor="#666"
               value={username}
@@ -262,6 +265,9 @@ export default function LoginScreen({ navigation }) {
           >
             <MaterialCommunityIcons name="lock" size={20} color="#64c8ff" />
             <TextInput
+              id="login-password"
+              name="password"
+              autoComplete="current-password"
               placeholder="Enter your password"
               placeholderTextColor="#666"
               secureTextEntry={!showPassword}
