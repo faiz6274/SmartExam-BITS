@@ -81,6 +81,20 @@ export default function HomeScreen({ navigation }) {
   const [userRole, setUserRole] = useState(null);
   const [userName, setUserName] = useState("User");
 
+  const logout = async () => {
+    try {
+      await AsyncStorage.multiRemove([
+        "accessToken",
+        "refreshToken",
+        "userRole",
+        "userName",
+      ]);
+      navigation.replace("Login");
+    } catch (e) {
+      console.error("Logout error:", e);
+    }
+  };
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -107,6 +121,14 @@ export default function HomeScreen({ navigation }) {
             {userName}! 👋
           </Text>
           <Text style={styles.subtitle}>Ready to ace your exams?</Text>
+
+          <TouchableOpacity
+            onPress={logout}
+            style={{ marginTop: 12, alignSelf: "flex-start" }}
+            activeOpacity={0.7}
+          >
+            <Text style={{ color: "#64c8ff", fontWeight: "700" }}>Logout</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.cardContainer}>

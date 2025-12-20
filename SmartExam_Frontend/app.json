@@ -14,8 +14,14 @@
       "package": "com.smartexam.app"
     },
     "extra": {
+<<<<<<< HEAD
       "eas": {
         "projectId": "c2320661-438e-4158-995a-f7a29614e78e"
+=======
+      "API_BASE": "http://13.200.180.132/api/",
+      "eas": {
+        "projectId": "046f778e-5add-4038-a380-92454dc296cd"
+>>>>>>> a0841998d0616a339ae50282dc2272a6d2ee8d41
       }
     }
   }
