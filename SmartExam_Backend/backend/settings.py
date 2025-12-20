@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -146,21 +145,13 @@ MEDIA_ROOT = BASE_DIR / "media"
 # AWS S3 (optional)
 # If AWS_STORAGE_BUCKET_NAME is set, use S3 for uploads
 # ------------------------------------------------------------
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
-AWS_S3_CUSTOM_DOMAIN = (
-    f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com" if AWS_STORAGE_BUCKET_NAME else None
-)
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', None)
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com" if AWS_STORAGE_BUCKET_NAME else None
 AWS_DEFAULT_ACL = None
-AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
-
-if AWS_STORAGE_BUCKET_NAME:
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
-else:
-    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' if AWS_STORAGE_BUCKET_NAME else 'django.core.files.storage.FileSystemStorage'
 
 # ------------------------------------------------------------
 # Auth model
