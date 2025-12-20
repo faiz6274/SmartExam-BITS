@@ -5,14 +5,24 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "assetBundlePatterns": ["**/*"],
-    "platforms": ["android", "web"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "platforms": [
+      "android",
+      "web"
+    ],
     "android": {
       "package": "com.smartexam.app",
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "extra": {
-      "API_BASE": "http://13.200.180.132:80/api/"
+      "API_BASE": "http://13.200.180.132:80/api/",
+      "eas": {
+        "projectId": "046f778e-5add-4038-a380-92454dc296cd"
+      }
     },
     "eas": {
       "projectId": "c2320661-438e-4158-995a-f7a29614e78e"
