@@ -4,8 +4,7 @@ import { Platform } from "react-native";
 import Constants from "expo-constants";
 
 // AWS Backend URL - PRODUCTION
-const API_BASE =
-  "http://ec2-13-200-180-132.ap-south-1.compute.amazonaws.com:8000/api/";
+const API_BASE = "http://13.200.180.132:8000/api/";
 
 console.log("[API Configuration - AWS ONLY]");
 console.log(`API Base URL: ${API_BASE}`);

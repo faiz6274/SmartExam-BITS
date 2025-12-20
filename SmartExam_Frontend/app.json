@@ -12,7 +12,7 @@
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "extra": {
-      "API_BASE": "http://ec2-13-200-180-132.ap-south-1.compute.amazonaws.com:8000/api/"
+      "API_BASE": "http://13.200.180.132:8000/api/"
     },
     "eas": {
       "projectId": "c2320661-438e-4158-995a-f7a29614e78e"
