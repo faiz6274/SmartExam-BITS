@@ -6,8 +6,10 @@ import Constants from "expo-constants";
 // Determine API base from Expo config `extra.API_BASE` when available.
 // Fallback to local defaults for development when not provided.
 const expoExtra = Constants?.expoConfig?.extra || {};
-const USE_LOCAL_BACKEND = !expoExtra.API_BASE; // True if using local defaults, false if from expo config
-let API_BASE = expoExtra.API_BASE || null;
+console.log("expoExtra:", expoExtra);
+console.log("expoExtra.API_BASE:", expoExtra.API_BASE);
+
+let API_BASE = expoExtra.API_BASE;
 
 if (!API_BASE) {
   // Local defaults
@@ -19,6 +21,8 @@ if (!API_BASE) {
     API_BASE = "http://localhost:8000/api/";
   }
 }
+
+const USE_LOCAL_BACKEND = !expoExtra.API_BASE; // True if using local defaults, false if from expo config
 
 const api = axios.create({
   baseURL: API_BASE,
