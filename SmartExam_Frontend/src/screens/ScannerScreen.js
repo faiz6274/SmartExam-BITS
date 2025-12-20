@@ -368,6 +368,8 @@ export default function ScannerScreen({ route, navigation }) {
 
       // Add metadata
       formData.append("page_count", images.length);
+      // include exam id so backend can associate submission
+      formData.append("exam", String(examId));
       formData.append("submitted_at", new Date().toISOString());
       formData.append("compression_quality", compressionQuality);
 
