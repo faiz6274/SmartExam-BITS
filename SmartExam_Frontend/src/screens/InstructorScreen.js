@@ -183,10 +183,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
+    flex: 1,
     backgroundColor: "#0f0f1e",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: height * 0.85,
     paddingBottom: 20,
   },
   modalHeader: {
@@ -918,8 +918,8 @@ export default function InstructorScreen({ navigation }) {
             </View>
 
             <ScrollView
-              style={{ flex: 1 }}
-              contentContainerStyle={{ padding: 20 }}
+              style={{ flex: 1, width: "100%" }}
+              contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
               showsVerticalScrollIndicator={false}
             >
               <View style={styles.formGroup}>

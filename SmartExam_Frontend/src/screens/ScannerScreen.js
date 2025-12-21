@@ -9,8 +9,8 @@ import {
   Alert,
   ActivityIndicator,
   FlatList,
-  Slider,
 } from "react-native";
+import Slider from "@react-native-community/slider";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system";

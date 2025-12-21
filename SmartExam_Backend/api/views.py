@@ -79,6 +79,26 @@ class SubmissionCreateView(generics.CreateAPIView):
         return JsonResponse(serialized.data, status=201, safe=False)
 
 
+class SubmissionListView(APIView):
+    """Get submissions - students see their own, instructors see all for their exams"""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        role = getattr(user, 'role', None)
+        
+        if role == 'instructor':
+            # Instructors see all submissions for exams they created
+            submissions = Submission.objects.filter(exam__instructor=user)
+        else:
+            # Students see only their own submissions
+            submissions = Submission.objects.filter(student=user)
+        
+        serializer = SubmissionSerializer(submissions, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class ExamListView(generics.ListAPIView):
     """List all published exams for students to view"""
     queryset = Exam.objects.filter(is_published=True)
