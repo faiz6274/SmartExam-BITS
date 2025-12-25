@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+import dj_database_url
 
 # ------------------------------------------------------------
 # Load environment variables from .env in project root
@@ -13,15 +14,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ------------------------------------------------------------
 # Core / Debug
 # ------------------------------------------------------------
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret")
-DEBUG = os.getenv("DEBUG", "1").lower() in ("1", "true", "yes")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-change-in-production")
+DEBUG = os.getenv("DEBUG", "0").lower() in ("1", "true", "yes")
 
 # Allowed hosts
 if DEBUG:
     ALLOWED_HOSTS = ["*", "testserver"]
 else:
-    # Default includes your EC2 IP and public DNS
-    default_hosts = "13.200.180.132,ec2-13-200-180-132.ap-south-1.compute.amazonaws.com,localhost,127.0.0.1"
+    # For production/Render - include all specified hosts
+    default_hosts = "localhost,127.0.0.1,*.onrender.com"
     ALLOWED_HOSTS = [
         h.strip() for h in os.getenv("ALLOWED_HOSTS", default_hosts).split(",") if h.strip()
     ]
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Must come after SecurityMiddleware
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     # Token-based mobile/API → CSRF not required
@@ -83,36 +85,45 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 # ------------------------------------------------------------
-# Database (SQLite for local; RDS for prod)
+# Database (SQLite for local; PostgreSQL for prod)
+# For Render: Use DATABASE_URL environment variable if available
 # ------------------------------------------------------------
-USE_LOCAL_DB = os.getenv("USE_LOCAL_DB", "true").lower() in ("1", "true", "yes")
-
-if USE_LOCAL_DB:
+if os.getenv("DATABASE_URL"):
+    # Render provides DATABASE_URL
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-            "OPTIONS": {
-                "timeout": 20,
-                "check_same_thread": False,
-            },
-        }
+        "default": dj_database_url.config(
+            default=os.getenv("DATABASE_URL"),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
 else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",   # Psycopg 3 works with this backend
-            "NAME": os.getenv("POSTGRES_DB", "smartexam"),
-            "USER": os.getenv("POSTGRES_USER", "admin"),
-            "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
-            "HOST": os.getenv("POSTGRES_HOST", "smartexam.cbw2iqs8ejf6.ap-south-1.rds.amazonaws.com"),
-            "PORT": os.getenv("POSTGRES_PORT", "5432"),
-            # TLS to RDS is recommended; it's separate from web HTTPS
-            "OPTIONS": {"sslmode": os.getenv("POSTGRES_SSLMODE", "require")},
-            # Reuse DB connections (seconds). Set 0 to disable.
-            "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
+    USE_LOCAL_DB = os.getenv("USE_LOCAL_DB", "true").lower() in ("1", "true", "yes")
+    
+    if USE_LOCAL_DB:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+                "OPTIONS": {
+                    "timeout": 20,
+                    "check_same_thread": False,
+                },
+            }
         }
-    }
+    else:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": os.getenv("POSTGRES_DB", "smartexam"),
+                "USER": os.getenv("POSTGRES_USER", "admin"),
+                "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+                "HOST": os.getenv("POSTGRES_HOST", "localhost"),
+                "PORT": os.getenv("POSTGRES_PORT", "5432"),
+                "OPTIONS": {"sslmode": os.getenv("POSTGRES_SSLMODE", "require")},
+                "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
+            }
+        }
 
 # ------------------------------------------------------------
 # Password validators
@@ -130,10 +141,11 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ------------------------------------------------------------
-# Static & Media (Nginx will serve STATIC_ROOT)
+# Static & Media (WhiteNoise will serve STATIC_ROOT)
 # ------------------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Optional local static dir for dev
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 
@@ -203,11 +215,16 @@ CORS_ALLOW_CREDENTIALS = False  # set True only if you use cookies
 
 # ------------------------------------------------------------
 # Security
-# ------------------------------------------------------------
 # Enable secure cookies when running behind HTTPS in production
-SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "0").lower() in ("1", "true", "yes")
-CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "0").lower() in ("1", "true", "yes")
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # harmless even on HTTP
+# Render automatically provides HTTPS
+# ------------------------------------------------------------
+SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "1").lower() in ("1", "true", "yes") and not DEBUG
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "1").lower() in ("1", "true", "yes") and not DEBUG
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "1").lower() in ("1", "true", "yes") and not DEBUG
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000")) if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "1").lower() in ("1", "true", "yes") and not DEBUG
+SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "1").lower() in ("1", "true", "yes") and not DEBUG
 
 # ------------------------------------------------------------
 # Cache
