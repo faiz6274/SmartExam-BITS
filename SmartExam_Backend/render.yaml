@@ -4,8 +4,10 @@ services:
     runtime: python
     runtimeVersion: "3.11"
     plan: free # Change to "starter" or "standard" for production
-    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput"
-    startCommand: "gunicorn backend.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2"
+    buildCommand: "cd SmartExam_Backend && pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput"
+    preDeployCommand: |
+      cd SmartExam_Backend && python manage.py migrate --noinput
+    startCommand: cd SmartExam_Backend && gunicorn backend.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2
     envVars:
       - key: DEBUG
         value: "0"
